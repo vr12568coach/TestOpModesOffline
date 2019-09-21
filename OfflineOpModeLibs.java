@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package OfflineClasses;
+package TestOpModesOffline;
 
 
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -45,7 +45,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 
-//import CoachCode.CoachFunctions.CoachDriveTest;
 //import CoachCode.CoachFunctions.CoachDriveFunction;
 import CoachCode.CoachOpMode.CoachBasicAuto;
 import CoachCode.CoachRobot.CoachHardware;
@@ -60,7 +59,6 @@ import CoachCode.CoachRobot.CoachHardware;
 public class OfflineOpModeLibs extends CoachBasicAuto{
 
 //    public CoachDriveFunction CoachDrive = new CoachDriveFunction();
-//        public CoachDriveTest CoachDrive = new CoachDriveTest();
 
 //    public Telemetry telemetry = new Telemetry();
 //    public FakeTelemetry telemetry = new FakeTelemetry();
@@ -701,7 +699,7 @@ public class OfflineOpModeLibs extends CoachBasicAuto{
         //============= SET ROBOT 1 or 2 to WRITE DATA ==============
 //        fileOutStream = new FileOutputStream("C:/Users/Spiessbach/Documents/GitHub/OfflineViz/RobotOnField.dat");// Path to directory for IntelliJ code
 //        fileOutStream = new FileOutputStream("C:/Users/Spiessbach/Documents/GitHub/OfflineCode/Robot1OnField.dat");// Path to directory for IntelliJ code
-        fileOutStream = new FileOutputStream("C:/Users/Spiessbach/Documents/GitHub/OfflineCode/"+String.format("Robot%dOnField.dat",OffLibs.RobotVincent.robotNumber));// Path to directory for IntelliJ code
+        fileOutStream = new FileOutputStream("C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/"+String.format("Robot%dOnField.dat",OffLibs.RobotVincent.robotNumber));// Path to directory for IntelliJ code
 
         dataOutStream = new DataOutputStream(fileOutStream);
 //calls code input by programmer into runAutonomous method that comes from main runOpMode

@@ -1,4 +1,4 @@
-package OfflineClasses;
+package TestOpModesOffline;
 
 /**
  * Created by Spiessbach on 8/26/2018.

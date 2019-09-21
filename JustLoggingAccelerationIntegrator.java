@@ -30,7 +30,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package OfflineClasses;
+package TestOpModesOffline;
 
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -38,7 +38,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
-import OfflineClasses.BNO055IMUInterface;
+//import TestOpModesOffline.BNO055IMUInterface;
 
 /**
  * {@link JustLoggingAccelerationIntegrator} is an integrator that doesn't actually

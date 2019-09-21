@@ -1,4 +1,4 @@
-package OfflineClasses;
+package TestOpModesOffline;
 
 
 import com.qualcomm.robotcore.hardware.DcMotorSimple;

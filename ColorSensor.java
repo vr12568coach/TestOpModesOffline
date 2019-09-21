@@ -1,4 +1,4 @@
-package OfflineClasses;
+package TestOpModesOffline;
 
 import android.graphics.Color;
 //import android.support.annotation.ColorInt;
