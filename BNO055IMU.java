@@ -13,6 +13,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
+import java.util.ArrayList;
+
 import CoachCode.CoachFunctions.CoachConstants;
 
 /**
@@ -36,6 +38,10 @@ public  class BNO055IMU{
     public int lsCnt=0;
     public double serPos=0;
 
+    public boolean haveBlueFoundation = false;
+    public boolean haveRedFoundation = false;
+    public boolean haveSkyStone = false;
+    public boolean stoneLocated = false;
 
 
     public double robotFRBLCount = 0;
@@ -47,6 +53,19 @@ public  class BNO055IMU{
     public double fieldX=0;
     public double fieldY=0;
     public double fieldDist=0;
+    //Define RedFoundation initial position
+    public double redFoundX = 20;
+    public double redFoundY = 51;
+    public double redFoundTheta = 0;
+    //Define BlueFoundation initial position
+    public double blueFoundX = -10;
+    public double blueFoundY = 51;
+    public double blueFoundTheta = 0;
+    //Define SkyStone initial position
+    public double stoneX = -20;
+    public double stoneY = -43;
+    public double stoneTheta = 0;
+
     public Orientation IMUangles = new Orientation(AxesReference.INTRINSIC, AxesOrder.ZYX, org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES, 100, 100, 100, 1);
     public AngularVelocity IMURate = new AngularVelocity(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES, 0, 0, 0, 1);
     public double priorAngle=0;
@@ -73,6 +92,10 @@ public  class BNO055IMU{
     public double[] fieldXArray=new double[size];
     public double[] fieldYArray=new double[size];
     public double[] fieldDistArray=new double[size];
+
+    public ArrayList<FieldLocation> RedFoundationPoints =new ArrayList();
+    public ArrayList<FieldLocation> BlueFoundationPoints =new ArrayList();
+    public ArrayList<FieldLocation> SkyStonePoints =new ArrayList();
 
     public int counter = 0;
     public double factor = 1;
@@ -127,6 +150,38 @@ public  class BNO055IMU{
         fieldY += fieldYInc;
         fieldDist = Math.sqrt(fieldX*fieldX + fieldY*fieldY);
 
+        if(haveRedFoundation){
+            redFoundX += fieldXInc;
+            redFoundY += fieldYInc;
+            redFoundTheta += (fakeAngle - priorAngle);
+        }
+        if(haveBlueFoundation){
+            blueFoundX += fieldXInc;
+            blueFoundY += fieldYInc;
+            blueFoundTheta += (fakeAngle - priorAngle);
+        }
+        if(haveSkyStone){
+            double stoneOffset = 10;//Distance from robot rotation center in inches, assume along x
+
+            if(!stoneLocated){
+                if(fieldX > 0){
+                    stoneOffset = -9;//Distance from robot rotation center in inches, assume along x
+                }
+                stoneX = fieldX + stoneOffset;
+                stoneY = fieldY;
+                stoneTheta += (fakeAngle - priorAngle);
+                stoneLocated = true;
+            }
+            else {
+
+                stoneX = fieldX + stoneOffset*Math.cos(Math.toRadians(fakeAngle));
+                stoneY = fieldY + stoneOffset*Math.sin(Math.toRadians(fakeAngle));
+                stoneTheta = fakeAngle;
+
+
+            }
+        }
+
 
         IMUangles.firstAngle = fakeAngle;//Note IMU returns angle in opposite orientation than robot coordinate system
         //IMU + angle = CCW ; robot + angle = CW
@@ -149,7 +204,14 @@ public  class BNO055IMU{
         fieldXArray[counter] = fieldX;
         fieldYArray[counter] = fieldY;
         fieldDistArray[counter] = fieldDist;
+        RedFoundationPoints.add(new FieldLocation(redFoundX,redFoundY,redFoundTheta));
+        BlueFoundationPoints.add(new FieldLocation(blueFoundX,blueFoundY,blueFoundTheta));
+        SkyStonePoints.add(new FieldLocation(stoneX,stoneY,stoneTheta));
+
         counter+=1;
+
+
+
         return IMUangles;
     }
 

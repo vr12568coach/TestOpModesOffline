@@ -49,6 +49,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -107,6 +108,7 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
     static FileWriter out = null;
     static FileOutputStream fileOutStream = null;
     static DataOutputStream dataOutStream = null;
+    static DataOutputStream dos = null;
 
     int IMUCounter =0;
 
@@ -115,19 +117,6 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
     /* Constructor */
     public OfflineOpModeLibs(){
 
-//        this.RobotVincent.imu.timeStep = this.timeStep;
-//        this.RobotVincent.frontLeft.timeStep = this.timeStep;
-//        this.RobotVincent.frontRight.timeStep = this.timeStep;
-//        this.RobotVincent.backRight.timeStep = this.timeStep;
-//        this.RobotVincent.backLeft.timeStep = this.timeStep;
-//        this.RobotVincent.landingSlide.timeStep = this.timeStep;
-//        this.RobotVincent.servoSampling.timeStep = this.timeStep;
-//        this.RobotVincent.colorSensorSampling.timeStep = this.timeStep;
-//
-//
-//        //Setting counter to capture array data is unique to offline running of code
-//        counter = 1;
-//        RobotVincent.imu.counter = counter;
     };
 
 
@@ -191,6 +180,9 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
         double deltaTime = (timeArray[1] - timeArray[0]);
         for(int k = IMUCounter; k < size;k++){
             timeArray[k] = timeArray[k-1] + deltaTime;
+            RobotVincent.imu.RedFoundationPoints.add(RobotVincent.imu.RedFoundationPoints.get(k-1));
+            RobotVincent.imu.BlueFoundationPoints.add(RobotVincent.imu.BlueFoundationPoints.get(k-1));
+            RobotVincent.imu.SkyStonePoints.add(RobotVincent.imu.SkyStonePoints.get(k-1));
 
         }
 
@@ -204,7 +196,8 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
 
         try {
             out.write(String.format("Calculated IMU Counts\r"));
-            out.write(String.format("Time,FL_IMU,FR_IMU,BR_IMU,BL_IMU,LS_IMU,FLBR_cnt,FRBL_cnt, RobotY, RobotX, RobotAngle, Field_Y, Field_X\r"));
+            out.write(String.format("Time,FL_IMU,FR_IMU,BR_IMU,BL_IMU,LS_IMU,FLBR_cnt,FRBL_cnt,"+
+                    "RobotY, RobotX, RobotAngle, Field_Y, Field_X\r"));
 
             for (int i = 0; i < countVar; i++) {
 //                out.write(String.format("%d,%d,%d,%d,%d,", i,  flCounts[i], frCounts[i], brCounts[i], blCounts[i]));
@@ -263,6 +256,37 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
         }
 
     }
+
+    //----------------------------------------------------------------------------------------------
+    // TEST MODE CODE ONLY - WRITES DATA TO FILE
+    //----------------------------------------------------------------------------------------------
+    public void writeListToFile(DataOutputStream fileData, ArrayList<FieldLocation> fieldList){
+        int countVar = Math.max(size, IMUCounter);
+
+        try {
+//          Write the data in binary format that can be read back in by the Java plotting programs in IntelliJ
+//          Only writing out the FieldLocation X,Y, Theta as formatted for reading in, Used for foundations, and stones so could also add robot
+
+            for (int j = 0; j < countVar; j++) {
+                // writes the bytes for each double in the array
+                fileData.writeDouble(fieldList.get(j).x);   // FieldLocation X position on field in inches
+                fileData.writeDouble(fieldList.get(j).y);   // FieldLocation Y position on field in inches
+                fileData.writeDouble(Math.toRadians(fieldList.get(j).theta));   // FieldLocation angle on field in radians
+            }
+            if(fileData != null){
+                fileData.flush();
+                fileData.close();
+            }
+
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            telemetry.addData("Error occurred","%S",e);
+            telemetry.update();
+
+        }
+
+    }
     //----------------------------------------------------------------------------------------------
     // TEST MODE CODE ONLY - WRITES DATA TO SCREEN
     //----------------------------------------------------------------------------------------------
@@ -307,6 +331,10 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
         RobotVincent.imu.frCnt = RobotVincent.frontRight.getCurrentPosition();
         RobotVincent.imu.brCnt = RobotVincent.backRight.getCurrentPosition();
         RobotVincent.imu.blCnt = RobotVincent.backLeft.getCurrentPosition();
+
+        RobotVincent.imu.haveBlueFoundation = haveBlueFoundation;
+        RobotVincent.imu.haveRedFoundation = haveRedFoundation;
+        RobotVincent.imu.haveSkyStone = haveSkyStone;
 
         try {
 //
@@ -411,6 +439,10 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
        RobotVincent.backRight.timeStep = timeStep;
        RobotVincent.backLeft.timeStep = timeStep;
 
+       RobotVincent.imu.RedFoundationPoints.add(new FieldLocation(RobotVincent.imu.redFoundX,RobotVincent.imu.redFoundY,RobotVincent.imu.redFoundTheta));
+       RobotVincent.imu.BlueFoundationPoints.add(new FieldLocation(RobotVincent.imu.blueFoundX,RobotVincent.imu.blueFoundY,RobotVincent.imu.blueFoundTheta));
+       RobotVincent.imu.SkyStonePoints.add(new FieldLocation(RobotVincent.imu.stoneX,RobotVincent.imu.stoneY,RobotVincent.imu.stoneTheta));
+
        //Setting counter to capture array data is unique to offline running of code
        counter = 1;
        RobotVincent.imu.counter = counter;
@@ -421,25 +453,25 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
 //           RobotVincent.frontLeft.motorTol=1.2;
 //           RobotVincent.backLeft.motorTol=1.2;
            //field angle orientation is + = CCW , while robot frame is + = CW
-           RobotVincent.imu.fieldX = 60;//initial x position on field in inches
-           RobotVincent.imu.fieldY = -12;//initial y position on field in inches
-           RobotVincent.imu.priorAngle = -90;//initial robot angle orientation on field in degrees from EAST
-           RobotVincent.imu.fakeAngle = -90;//initial robot angle orientation on field in degrees from EAST
+           RobotVincent.imu.fieldX = 63;//initial x position on field in inches
+           RobotVincent.imu.fieldY = -28;//initial y position on field in inches
+           RobotVincent.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
+           RobotVincent.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
        }
 
 
        if(RobotVincent.robotNumber == 2) {
 
-           constants.phm.get("DRIVE_POWER_LIMIT").setValue(0.5);
+           constants.phm.get("DRIVE_POWER_LIMIT").setValue(0.75);
            constants.phm.get("squareDistance").setValue(32);
 //           RobotVincent.frontLeft.motorTol=1.2;
-           RobotVincent.backLeft.motorTol=1.2;
-
+//           RobotVincent.backLeft.motorTol=1.2;
+//
            //field angle orientation is + = CCW , while robot frame is + = CW
-           RobotVincent.imu.fieldX = 24;//initial x position on field in inches
-           RobotVincent.imu.fieldY = 24;//initial y position on field in inches
-           RobotVincent.imu.priorAngle = 90;//initial robot angle orientation on field in degrees from EAST
-           RobotVincent.imu.fakeAngle = 90;//initial robot angle orientation on field in degrees from EAST
+           RobotVincent.imu.fieldX = 63;//initial x position on field in inches
+           RobotVincent.imu.fieldY = 48;//initial y position on field in inches
+           RobotVincent.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
+           RobotVincent.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
            telemetry.addData("Robot Number ", "%d",RobotVincent.robotNumber);
            telemetry.addData("DRIVE_POWER_LIMIT ", "%.2f",constants.phm.get("DRIVE_POWER_LIMIT").value);
            telemetry.addData("squareDistance ", "%.2f",constants.phm.get("squareDistance").value);
@@ -480,8 +512,6 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
                 forwardPosition,rightPosition,clockwisePosition);
         telemetry.update();//Update telemetry to update display
 
-        runtime.reset();
-
 
         //Complete initialization and telemetry
         //**** PUSHING START BUTTON WILL RUN AUTONOMOUS CODE ******
@@ -489,10 +519,18 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
 
         runtime.reset(); //reset counter to start with OpMode
 
-        driveSquare(constants.phm.get("squareDistance").value);
-        constants.phm.get("DRIVE_POWER_LIMIT").setValue(constants.phm.get("DRIVE_POWER_LIMIT").value/2);
-
-        driveSquare(constants.phm.get("squareDistance").value/2);
+//        driveSquare(constants.phm.get("squareDistance").value);
+//        constants.phm.get("DRIVE_POWER_LIMIT").setValue(constants.phm.get("DRIVE_POWER_LIMIT").value/2);
+//
+//        driveSquare(constants.phm.get("squareDistance").value/2);
+        if(RobotVincent.robotNumber ==1) {
+            getRedStone();
+//            getBlueStone();
+        }
+        if(RobotVincent.robotNumber ==2) {
+            getRedFoundation();
+//            getBlueFoundation();
+        }
 
     } //MAIN OpMode PROGRAM END
 
@@ -530,6 +568,19 @@ public class OfflineOpModeLibs extends CoachBasicAuto {
         OffLibs.writeToFile(out, dataOutStream);
 //        OffLibs.writeToScreen();
         fileOutStream.close();
+
+        if(OffLibs.RobotVincent.robotNumber ==1) {
+            dos = new DataOutputStream(new FileOutputStream("C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/SkyStone.dat"));// Path to directory for IntelliJ code
+            OffLibs.writeListToFile(dos, OffLibs.RobotVincent.imu.SkyStonePoints);
+        }
+        if(OffLibs.RobotVincent.robotNumber ==2) {
+            dos = new DataOutputStream(new FileOutputStream("C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/RedFoundation.dat"));// Path to directory for IntelliJ code
+            OffLibs.writeListToFile(dos, OffLibs.RobotVincent.imu.RedFoundationPoints);
+
+            dos = new DataOutputStream(new FileOutputStream("C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/BlueFoundation.dat"));// Path to directory for IntelliJ code
+            OffLibs.writeListToFile(dos, OffLibs.RobotVincent.imu.BlueFoundationPoints);
+        }
+
         OffLibs.telemetry.addData("Total Number of Time Steps", "%d",OffLibs.IMUCounter);
         OffLibs.telemetry.update();
     }
