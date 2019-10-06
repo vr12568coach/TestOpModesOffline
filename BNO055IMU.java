@@ -13,14 +13,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
-import CoachCode.CoachFunctions.CoachParameters;
+import CoachCode.CoachFunctions.CoachConstants;
 
 /**
  * Created by Spiessbach on 8/26/2018.
  */
 
 public  class BNO055IMU{
-    public CoachParameters params = new CoachParameters();
+    public CoachConstants params = new CoachConstants();
 
 //    final double ROBOT_INCH_TO_MOTOR_DEG = 360 / (3.977 * Math.PI);// 360 deg. / wheel circumference (Wheel diameter x pi)
 //    final int DEGREES_TO_COUNTS = 1440 / 360; //Counts per 1 revolution
@@ -98,20 +98,21 @@ public  class BNO055IMU{
         robotFRBLCount = 0.707* Math.signum(deltaFR)*(Math.abs(deltaFR-deltaSum) + Math.abs(deltaBL-deltaSum))/2;//
 // removed +=
 
-//        if(Math.signum(deltaFL)!= Math.signum(deltaFR) && Math.signum(deltaFL)== Math.signum(deltaBL)){
-//            factor = 1.0;
-//        }
-//        else if(deltaSum != 0)
-//            factor = 1.0;
-//        else
-//            factor = 0.6;
-        factor = 1;
+        if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)!= Math.signum(deltaBL)){
+            factor = 1/params.adjustedRight;
+        }
+        else if(deltaSum != 0)
+            factor = 1/params.adjustedRotate;
+        else {
+
+            factor = 1/params.adjustedFwd;
+        }
 //adding +=
 //Coordinate transformation to take motor drive coordinates to robot body reference frame - fixed 45 deg rotation
         double robotXInc = factor* ((robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
                 (params.DEGREES_TO_COUNTS*params.ROBOT_INCH_TO_MOTOR_DEG);
-        double robotYInc = factor* ((-robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
-                (params.DEGREES_TO_COUNTS*params.ROBOT_INCH_TO_MOTOR_DEG);
+        double robotYInc = -factor* ((-robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
+                (params.DEGREES_TO_COUNTS*params.ROBOT_INCH_TO_MOTOR_DEG);//flipped sign based on sign correction in CoachDriveFunction for R/L
         robotX += robotXInc;
         robotY += robotYInc;
         robotDist = Math.sqrt(robotX*robotX + robotY*robotY);
@@ -169,6 +170,7 @@ public  class BNO055IMU{
      * @return
      */
     public boolean initialize(BNO055IMU.Parameters parameters){
+        params.defineParams();
         return true;
     }
     /**
