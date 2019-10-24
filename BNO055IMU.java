@@ -15,14 +15,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import java.util.ArrayList;
 
-import CoachCode.CoachFunctions.CoachConstants;
+import Skystone_14999.Parameters.Constants;
 
 /**
  * Created by Spiessbach on 8/26/2018.
  */
 
 public  class BNO055IMU{
-    public CoachConstants params = new CoachConstants();
+    public Constants params = new Constants();
 
 //    final double ROBOT_INCH_TO_MOTOR_DEG = 360 / (3.977 * Math.PI);// 360 deg. / wheel circumference (Wheel diameter x pi)
 //    final int DEGREES_TO_COUNTS = 1440 / 360; //Counts per 1 revolution
@@ -128,7 +128,7 @@ public  class BNO055IMU{
             factor = 1/params.adjustedRotate;
         else {
 
-            factor = 1/params.adjustedFwd;
+            factor = 1;
         }
 //adding +=
 //Coordinate transformation to take motor drive coordinates to robot body reference frame - fixed 45 deg rotation
@@ -232,7 +232,7 @@ public  class BNO055IMU{
      * @return
      */
     public boolean initialize(BNO055IMU.Parameters parameters){
-        params.defineParams();
+        params.defineParameters();
         return true;
     }
     /**

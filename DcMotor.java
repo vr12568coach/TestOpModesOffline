@@ -79,6 +79,10 @@ public class DcMotor {
             this.fakePosition += deltaPosition;
         }
     }
+    public int getTargetPosition() {
+
+        return this.targetPosition;
+    }
     public enum ZeroPowerBehavior{
         UNKNOWN,
         BRAKE,
