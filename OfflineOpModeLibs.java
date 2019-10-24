@@ -451,7 +451,7 @@ public class OfflineOpModeLibs extends BasicAuto {
        //Setting counter to capture array data is unique to offline running of code
        counter = 1;
        Billy.imu.counter = counter;
-       Billy.robotNumber = 1;
+       Billy.robotNumber = 2;
        if(Billy.robotNumber == 1) {
            cons.pHM.get("drivePowerLimit").setParameter(0.5);
 //           Billy.frontLeft.motorTol=1.2;
@@ -471,10 +471,10 @@ public class OfflineOpModeLibs extends BasicAuto {
 //           Billy.backLeft.motorTol=1.2;
 //
            //field angle orientation is + = CCW , while robot frame is + = CW
-           Billy.imu.fieldX = 63;//initial x position on field in inches
+           Billy.imu.fieldX = -63;//initial x position on field in inches
            Billy.imu.fieldY = 48;//initial y position on field in inches
-           Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
-           Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
            telemetry.addData("Robot Number ", "%d",Billy.robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.pHM.get("drivePowerLimit").value);
 
@@ -519,12 +519,16 @@ public class OfflineOpModeLibs extends BasicAuto {
         }
         if(Billy.robotNumber ==2) {
 
-            drv.driveGeneral(DriveMethods.moveDirection.RightLeft, -24, cons.pHM.get("drivePowerLimit").value, "Left 24 inches",this);
-            sleep(1000);
-            drv.driveGeneral(DriveMethods.moveDirection.Rotate, 90, cons.pHM.get("drivePowerLimit").value, "Clockwise 90 degrees",this);
-            sleep(1000);
-            drv.driveGeneral(DriveMethods.moveDirection.FwdBack, 24, cons.pHM.get("drivePowerLimit").value, "Back 24 inches",this);
-            sleep(1000);
+            grabFoundation();
+
+            pullFoundation();
+
+            aroundFoundation();
+
+            pushFoundation();
+
+            telemetry.addLine("OpMode Complete");
+            sleep(2000);
         }
 
     } //MAIN OpMode PROGRAM END
