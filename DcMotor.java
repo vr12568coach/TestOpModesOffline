@@ -97,6 +97,12 @@ public class DcMotor {
     }
 
     public void setMode(RunMode rm){
+        if(rm == RunMode.RUN_TO_POSITION){
+            this.targetMode = "Yes";
+        }
+        if(rm == RunMode.RUN_USING_ENCODER){
+            this.targetMode = "No";
+        }
 
     }
 

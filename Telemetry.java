@@ -9,7 +9,7 @@ public class Telemetry {
 //        telemetry.addData("Distance", " Command(%.2f), Current(%.2f)", commandInch, distanceTraveledInch);
 //        telemetry.addData("control loop:", "Current Error(%.1f), Sum Error(%.1f), Steering Power(%.1f)", error, sumError, steerInput);
 //        telemetry.update();
-    public String[] TMData = new String[10];
+    public String[] TMData = new String[100];
     public int index;
 
 
