@@ -451,7 +451,8 @@ public class OfflineOpModeLibs extends BasicAuto {
        //Setting counter to capture array data is unique to offline running of code
        counter = 1;
        Billy.imu.counter = counter;
-       Billy.robotNumber = 2;
+       Billy.robotNumber = 1;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       sideColor = 1;// - RED Side, + BLUE Side
        if(Billy.robotNumber == 1) {
            cons.pHM.get("drivePowerLimit").setParameter(0.5);
 //           Billy.frontLeft.motorTol=1.2;
@@ -486,7 +487,6 @@ public class OfflineOpModeLibs extends BasicAuto {
        Billy.imu.fieldYArray[0] = Billy.imu.fieldY; //initial y position on field in inches
        Billy.imu.robotAngleArray[0] = Billy.imu.priorAngle; //initial robot angle orientation on field in degrees from EAST
 
-
    }
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -514,6 +514,10 @@ public class OfflineOpModeLibs extends BasicAuto {
 
             findSkyStone();
 
+            brideCrossOutside();
+
+            parkOutside();
+
             telemetry.addLine("OpMode Complete");
             sleep(2000);
         }
@@ -526,6 +530,8 @@ public class OfflineOpModeLibs extends BasicAuto {
             aroundFoundation();
 
             pushFoundation();
+
+            awayFromFoundationInside();
 
             telemetry.addLine("OpMode Complete");
             sleep(2000);
