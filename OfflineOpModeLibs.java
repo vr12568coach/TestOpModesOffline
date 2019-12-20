@@ -31,16 +31,11 @@ package TestOpModesOffline;
 
 
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 import Skystone_14999.DriveMotion.DriveMethods;
 import Skystone_14999.OpModes.Autonomous.BasicAuto;
-import TestOpModesOffline.DcMotor;
 //import com.qualcomm.robotcore.hardware.HardwareMap;
 //import com.qualcomm.robotcore.robot.Robot;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -49,8 +44,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-
 
 
 /**
@@ -452,9 +445,13 @@ public class OfflineOpModeLibs extends BasicAuto {
        counter = 1;
        Billy.imu.counter = counter;
        Billy.robotNumber = 1;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       sideColor = 1;// - RED Side, + BLUE Side
+       foundationPosChange = 26;// 26 for unmoved Foundation, 0 for moved Foundation
+       insideOutside = 0;// 0 for Inside, 24 for Outside
+       foundationInOut = 26;// 0 for Inside, 26 for Outside
+       sideColor = 1;// + for Blue, - for Red
+
        if(Billy.robotNumber == 1) {
-           cons.pHM.get("drivePowerLimit").setParameter(0.5);
+           cons.pHM.get("drivePowerLimit").setParameter(0.75);
 //           Billy.frontLeft.motorTol=1.2;
 //           Billy.backLeft.motorTol=1.2;
            //field angle orientation is + = CCW , while robot frame is + = CW
@@ -463,7 +460,6 @@ public class OfflineOpModeLibs extends BasicAuto {
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
        }
-
 
        if(Billy.robotNumber == 2) {
 
@@ -474,8 +470,8 @@ public class OfflineOpModeLibs extends BasicAuto {
            //field angle orientation is + = CCW , while robot frame is + = CW
            Billy.imu.fieldX = -63;//initial x position on field in inches
            Billy.imu.fieldY = 48;//initial y position on field in inches
-           Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
-           Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
            telemetry.addData("Robot Number ", "%d",Billy.robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.pHM.get("drivePowerLimit").value);
 
@@ -514,15 +510,18 @@ public class OfflineOpModeLibs extends BasicAuto {
 
             findSkyStone();
 
-            brideCrossOutside();
+            crossDropStoneFor2();
 
-            parkOutside();
+            getSecondStone();
 
-            telemetry.addLine("OpMode Complete");
-            sleep(2000);
         }
         if(Billy.robotNumber ==2) {
+            if(foundationPosChange == 26){
 
+                drv.driveGeneral(DriveMethods.moveDirection.RightLeft,-50, cons.pHM.get("drivePowerLimit").value, "Left 30 inches",this);
+            }
+
+            if(foundationPosChange != 26) {
             grabFoundation();
 
             pullFoundation();
@@ -531,10 +530,9 @@ public class OfflineOpModeLibs extends BasicAuto {
 
             pushFoundation();
 
-            awayFromFoundationInside();
+            awayFromFoundation();
 
-            telemetry.addLine("OpMode Complete");
-            sleep(2000);
+            }
         }
 
     } //MAIN OpMode PROGRAM END
@@ -555,7 +553,6 @@ public class OfflineOpModeLibs extends BasicAuto {
         // Sets initial position and counters and initial array variables
         OffLibs.prepOpMode();
 
-
         StringBuilder fileName = new StringBuilder();
         fileName.append("RMO_");
         fileName.append(String.format("%s.csv","RuckusAutonomous01"));
@@ -574,21 +571,17 @@ public class OfflineOpModeLibs extends BasicAuto {
 //        OffLibs.writeToScreen();
         fileOutStream.close();
 
-        if(OffLibs.Billy.robotNumber ==1) {
-            dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/SkyStone.dat"));// Path to directory for IntelliJ code
-            OffLibs.writeListToFile(dos, OffLibs.Billy.imu.SkyStonePoints);
-        }
-        if(OffLibs.Billy.robotNumber ==2) {
-            dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/RedFoundation.dat"));// Path to directory for IntelliJ code
-            OffLibs.writeListToFile(dos, OffLibs.Billy.imu.RedFoundationPoints);
+        dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/SkyStone.dat"));// Path to directory for IntelliJ code
+        OffLibs.writeListToFile(dos, OffLibs.Billy.imu.SkyStonePoints);
 
-            dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/BlueFoundation.dat"));// Path to directory for IntelliJ code
-            OffLibs.writeListToFile(dos, OffLibs.Billy.imu.BlueFoundationPoints);
-        }
+        dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/RedFoundation.dat"));// Path to directory for IntelliJ code
+        OffLibs.writeListToFile(dos, OffLibs.Billy.imu.RedFoundationPoints);
+
+        dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/BlueFoundation.dat"));// Path to directory for IntelliJ code
+        OffLibs.writeListToFile(dos, OffLibs.Billy.imu.BlueFoundationPoints);
 
         OffLibs.telemetry.addData("Total Number of Time Steps", "%d",OffLibs.IMUCounter);
         OffLibs.telemetry.update();
     }
-
 
 }

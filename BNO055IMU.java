@@ -156,9 +156,14 @@ public  class BNO055IMU{
             redFoundTheta += (fakeAngle - priorAngle);
         }
         if(haveBlueFoundation){
-            blueFoundX += fieldXInc;
-            blueFoundY += fieldYInc;
-            blueFoundTheta += (fakeAngle - priorAngle);
+//            blueFoundX += fieldXInc;
+//            blueFoundY += fieldYInc;
+//            blueFoundTheta += (fakeAngle - priorAngle);
+            double foundationOffset = 9 - (34.5 / 2);
+
+            blueFoundX = fieldX + foundationOffset*Math.cos(Math.toRadians(fakeAngle));
+            blueFoundY = fieldY + foundationOffset*Math.sin(Math.toRadians(fakeAngle));
+            blueFoundTheta = fakeAngle + 90;
         }
         if(haveSkyStone){
             double stoneOffset = 10;//Distance from robot rotation center in inches, assume along x
