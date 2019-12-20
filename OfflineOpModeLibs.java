@@ -176,21 +176,9 @@ public class OfflineOpModeLibs extends BasicAuto {
 //        Arrays.fill(arrayFieldY,IMUCounter,(size),arrayFieldY[IMUCounter-1]);
         Arrays.fill(arrayFieldDist,IMUCounter,(size),arrayFieldDist[IMUCounter-1]);
 
-// ----------------- ADDED CODE NOT IN "coach" version ERROR? ---------------------
-        //missing 1 point in field array vs robot array list
-        fc.BlueFoundationPoints.add(fc.BlueFoundationPoints.get(IMUCounter-2));
-        fc.RedFoundationPoints.add(fc.RedFoundationPoints.get(IMUCounter-2));
-
-        fc.RedSkyStone1Points.add(fc.RedSkyStone1Points.get(IMUCounter-2));
-        fc.BlueSkyStone1Points.add(fc.BlueSkyStone1Points.get(IMUCounter-2));
-
-        fc.BlueSkyStone2Points.add(fc.BlueSkyStone2Points.get(IMUCounter-2));
-        fc.RedSkyStone2Points.add(fc.RedSkyStone2Points.get(IMUCounter-2));
-
-// ----------------- ADDED CODE NOT IN "coach" version ERROR? ---------------------
 
         double deltaTime = (timeArray[1] - timeArray[0]);
-        for(int k = IMUCounter; k < size;k++){// needed to reduce counter by 1 -- means there is an extra count somewhere
+        for(int k = IMUCounter-1; k < size;k++){// needed to reduce counter by 1 -- means there is an extra count somewhere
             timeArray[k] = timeArray[k-1] + deltaTime;
             Billy.imu.RobotPoints.add(Billy.imu.RobotPoints.get(k-1));
             Billy.imu.GripperPoints.add(Billy.imu.GripperPoints.get(k-1));
@@ -472,28 +460,18 @@ public class OfflineOpModeLibs extends BasicAuto {
        Billy.gripper.timeStep = timeStep;
 
        fc.RedFoundationPoints.clear();
-       fc.RedFoundationPoints.add(new FieldLocation(fc.redFound.x,fc.redFound.y,fc.redFound.theta));
-
        fc.BlueFoundationPoints.clear();
-       fc.BlueFoundationPoints.add(new FieldLocation(fc.blueFound.x,fc.blueFound.y,fc.blueFound.theta));
-
        fc.BlueSkyStone1Points.clear();
-       fc.BlueSkyStone1Points.add(new FieldLocation(fc.blueStone1.x,fc.blueStone1.y,fc.blueStone1.theta));
-
        fc.RedSkyStone1Points.clear();
-       fc.RedSkyStone1Points.add(new FieldLocation(fc.redStone1.x,fc.redStone1.y,fc.redStone1.theta));
-
        fc.BlueSkyStone2Points.clear();
-       fc.BlueSkyStone2Points.add(new FieldLocation(fc.blueStone2.x,fc.blueStone2.y,fc.blueStone2.theta));
-
        fc.RedSkyStone2Points.clear();
-       fc.RedSkyStone2Points.add(new FieldLocation(fc.redStone2.x,fc.redStone2.y,fc.redStone2.theta));
+       fc.updateField(this);
 
        Billy.imu.GripperPoints.clear();
-       Billy.imu.GripperPoints.add(new FieldLocation(Billy.imu.gripperX, Billy.imu.gripperY, Billy.imu.gripperTheta));
+//       Billy.imu.GripperPoints.add(new FieldLocation(Billy.imu.gripperX, Billy.imu.gripperY, Billy.imu.gripperTheta));
 
        Billy.imu.RobotPoints.clear();
-       Billy.imu.RobotPoints.add(new FieldLocation(Billy.imu.robotOnField.x, Billy.imu.robotOnField.y, Billy.imu.robotOnField.theta));
+//       Billy.imu.RobotPoints.add(new FieldLocation(Billy.imu.robotOnField.x, Billy.imu.robotOnField.y, Billy.imu.robotOnField.theta));
 
        //Setting counter to capture array data is unique to offline running of code
        counter = 1;
@@ -525,10 +503,10 @@ public class OfflineOpModeLibs extends BasicAuto {
 //
            //field angle orientation is + = CCW , while robot frame is + = CW
            Billy.imu.robotOnField.x = -63;//initial x position on field in inches
-           Billy.imu.robotOnField.y = 48;//initial y position on field in inches
-           Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST
-           Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
-           Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.robotOnField.y = 48;//initial y position on field in inches (WAS 48)
+           Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
+           Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
+           Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
            telemetry.addData("Robot Number ", "%d",Billy.robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.pHM.get("drivePowerLimit").value);
 
@@ -550,10 +528,10 @@ public class OfflineOpModeLibs extends BasicAuto {
        if(Billy.robotNumber == 4) {
 
            Billy.imu.robotOnField.x = 63;//initial x position on field in inches
-           Billy.imu.robotOnField.y = 48;//initial y position on field in inches
-           Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST
-           Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
-           Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.robotOnField.y = 48;//initial y position on field in inches (WAS 48)
+           Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
+           Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
+           Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
            telemetry.addData("Robot Number ", "%d",Billy.robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.pHM.get("drivePowerLimit").value);
 
@@ -625,27 +603,28 @@ public class OfflineOpModeLibs extends BasicAuto {
 
         }
         if(Billy.robotNumber ==2 || Billy.robotNumber ==4 ) {
-            if(foundationPosChange == 26){
-
-                drv.driveGeneral(DriveMethods.moveDirection.RightLeft,-50*sideColor, cons.pHM.get("drivePowerLimit").value, "Left 30 inches",this);
-                //KS COMMENT 12/20/19 - need to add sideColor to correct motion for blue/red
-                if(Billy.robotNumber ==2){writeBF = true;}
-                if(Billy.robotNumber ==4){writeRF = true;}
-                // Added if statements to write foundation files to clear old data
-            }
-
-            if(foundationPosChange != 26) {
-            grabFoundation();
-
-            pullFoundation();
-
-            aroundFoundation();
-
-            pushFoundation();
-
-            awayFromFoundation();
-
-            }
+//            if(foundationPosChange == 26){
+//
+//                drv.driveGeneral(DriveMethods.moveDirection.RightLeft,-50*sideColor, cons.pHM.get("drivePowerLimit").value, "Left 30 inches",this);
+//                //KS COMMENT 12/20/19 - need to add sideColor to correct motion for blue/red
+//                if(Billy.robotNumber ==2){writeBF = true;}
+//                if(Billy.robotNumber ==4){writeRF = true;}
+//                // Added if statements to write foundation files to clear old data
+//            }
+//
+//            if(foundationPosChange != 26) {
+//            grabFoundation();
+//
+//            pullFoundation();
+//
+//            aroundFoundation();
+//
+//            pushFoundation();
+//
+//            awayFromFoundation();
+//
+//            }
+            coachFoundation();
         }
 
     } //MAIN OpMode PROGRAM END
@@ -674,8 +653,8 @@ public class OfflineOpModeLibs extends BasicAuto {
 
             OffLibs.Billy.robotNumber = h;//!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             OffLibs.foundationPosChange = 26;// 26 for unmoved Foundation, 0 for moved Foundation
-            OffLibs.insideOutside = 24;// 0 for Inside, 24 for Outside
-            OffLibs.foundationInOut = 0;// 0 for Inside, 26 for Outside
+            OffLibs.insideOutside = 0;// 0 for Inside, 24 for Outside
+            OffLibs.foundationInOut = 26;// 0 for Inside, 26 for Outside
             if(h ==1 || h==2) {
                 OffLibs.sideColor = 1;// + for Blue for robots 1 & 2
             }
