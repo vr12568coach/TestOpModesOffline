@@ -4,13 +4,13 @@ package TestOpModesOffline;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+//import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
+//import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import java.util.ArrayList;
@@ -24,25 +24,17 @@ import Skystone_14999.Parameters.Constants;
 public  class BNO055IMU{
     public Constants params = new Constants();
 
-//    final double ROBOT_INCH_TO_MOTOR_DEG = 360 / (3.977 * Math.PI);// 360 deg. / wheel circumference (Wheel diameter x pi)
-//    final int DEGREES_TO_COUNTS = 1440 / 360; //Counts per 1 revolution
-//    final double ROBOT_DEG_TO_WHEEL_INCH = 19.694 * Math.PI / 360;//Robot rotation circumference [(wheel base (diagonal)] * pi/360 deg
-//    double driveDistance = 24;//Target distance inches for robot motion in any omni direction for drive motors
-//    int maxCounts = (int) Math.round(driveDistance*ROBOT_INCH_TO_MOTOR_DEG*DEGREES_TO_COUNTS);
     public float fakeAngle=0;
     public float fakeRate=0;
     public int flCnt=0;
     public int frCnt=0;
     public int brCnt=0;
     public int blCnt=0;
-    public int lsCnt=0;
-    public double serPos=0;
-
-    public boolean haveBlueFoundation = false;
-    public boolean haveRedFoundation = false;
-    public boolean haveSkyStone = false;
-    public boolean stoneLocated = false;
-
+    public int jackCnt =0;
+    public int gripCnt=0;
+    public double blueStoneServoPos=0;
+    public double redStoneServoPos =0;
+    double gripperOffset = 12;//Distance from robot rotation center in inches to gripper
 
     public double robotFRBLCount = 0;
     public double robotFLBRCount = 0;
@@ -50,21 +42,16 @@ public  class BNO055IMU{
     public double robotX=0;
     public double robotY=0;
     public double robotDist=0;
-    public double fieldX=0;
-    public double fieldY=0;
+//    public double fieldX=0;
+//    public double fieldY=0;
     public double fieldDist=0;
-    //Define RedFoundation initial position
-    public double redFoundX = 20;
-    public double redFoundY = 51;
-    public double redFoundTheta = 0;
-    //Define BlueFoundation initial position
-    public double blueFoundX = -10;
-    public double blueFoundY = 51;
-    public double blueFoundTheta = 0;
-    //Define SkyStone initial position
-    public double stoneX = -20;
-    public double stoneY = -43;
-    public double stoneTheta = 0;
+
+    public FieldLocation robotOnField = new FieldLocation(0,0,0);
+
+    public double gripperX = 0;
+    public double gripperY = 0;
+    public double gripperTheta = 0;
+
 
     public Orientation IMUangles = new Orientation(AxesReference.INTRINSIC, AxesOrder.ZYX, org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES, 100, 100, 100, 1);
     public AngularVelocity IMURate = new AngularVelocity(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES, 0, 0, 0, 1);
@@ -78,7 +65,7 @@ public  class BNO055IMU{
     public int[] frArray=new int[size];
     public int[] brArray=new int[size];
     public int[] blArray=new int[size];
-    public int[] lsArray=new int[size];
+    public int[] jackArray =new int[size];
 
 
     public double[] FLBRArray=new double[size];
@@ -89,13 +76,16 @@ public  class BNO055IMU{
     public double[] robotDistArray=new double[size];
     public double[] robotAngleArray=new double[size];
 
-    public double[] fieldXArray=new double[size];
-    public double[] fieldYArray=new double[size];
+//    public double[] fieldXArray=new double[size];
+//    public double[] fieldYArray=new double[size];
     public double[] fieldDistArray=new double[size];
 
-    public ArrayList<FieldLocation> RedFoundationPoints =new ArrayList();
-    public ArrayList<FieldLocation> BlueFoundationPoints =new ArrayList();
-    public ArrayList<FieldLocation> SkyStonePoints =new ArrayList();
+    public ArrayList<FieldLocation> GripperPoints =new ArrayList();
+    public ArrayList<FieldLocation> RobotPoints =new ArrayList();
+
+    public int[] jackDirection =new int[size];
+    public double[] gripperWidth =new double[size];
+
 
     public int counter = 0;
     public double factor = 1;
@@ -108,7 +98,23 @@ public  class BNO055IMU{
         int deltaFR = frCnt - frArray[counter-1];
         int deltaBR = brCnt - brArray[counter-1];
         int deltaBL = blCnt - blArray[counter-1];
-        int deltaLS = lsCnt - lsArray[counter-1];
+        int deltaJack = jackCnt - jackArray[counter-1];
+
+        //jack and gripper calculations
+        if (deltaJack > 0){
+            jackDirection[counter] = 1;
+        }
+        else if(deltaJack < 0){
+            jackDirection[counter] = -1;
+        }
+        else {
+            jackDirection[counter] = 0;
+        }
+
+        gripperWidth[counter] = 12 +gripCnt/200;
+
+        //drive motor claculations
+
         int deltaSum = (deltaFL  + deltaFR  + deltaBR  + deltaBL)/4;
         fakeAngle += (float) deltaSum / (params.DEGREES_TO_COUNTS * params.ROBOT_INCH_TO_MOTOR_DEG *
                 params.ROBOT_DEG_TO_WHEEL_INCH * params.adjustedRotate);
@@ -124,8 +130,10 @@ public  class BNO055IMU{
         if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)!= Math.signum(deltaBL)){
             factor = 1/params.adjustedRight;
         }
-        else if(deltaSum != 0)
-            factor = 1/params.adjustedRotate;
+        else if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)== Math.signum(deltaBL)) {
+            factor = 1 / params.adjustedRotate;
+        }
+
         else {
 
             factor = 1;
@@ -135,7 +143,7 @@ public  class BNO055IMU{
         double robotXInc = factor* ((robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
                 (params.DEGREES_TO_COUNTS*params.ROBOT_INCH_TO_MOTOR_DEG);
         double robotYInc = -factor* ((-robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
-                (params.DEGREES_TO_COUNTS*params.ROBOT_INCH_TO_MOTOR_DEG);//flipped sign based on sign correction in CoachDriveFunction for R/L
+                (params.DEGREES_TO_COUNTS*params.ROBOT_INCH_TO_MOTOR_DEG);
         robotX += robotXInc;
         robotY += robotYInc;
         robotDist = Math.sqrt(robotX*robotX + robotY*robotY);
@@ -146,47 +154,15 @@ public  class BNO055IMU{
                 (robotYInc*Math.sin(Math.toRadians(fakeAngle)));//flipped sign on Ry term
         double fieldYInc = (robotXInc*Math.sin(Math.toRadians(fakeAngle))) +
                 (robotYInc*Math.cos(Math.toRadians(fakeAngle)));//flipped sign on Rx term
-        fieldX += fieldXInc;
-        fieldY += fieldYInc;
-        fieldDist = Math.sqrt(fieldX*fieldX + fieldY*fieldY);
+        robotOnField.x += fieldXInc;
+        robotOnField.y += fieldYInc;
+        robotOnField.theta = fakeAngle;
 
-        if(haveRedFoundation){
-            redFoundX += fieldXInc;
-            redFoundY += fieldYInc;
-            redFoundTheta += (fakeAngle - priorAngle);
-        }
-        if(haveBlueFoundation){
-//            blueFoundX += fieldXInc;
-//            blueFoundY += fieldYInc;
-//            blueFoundTheta += (fakeAngle - priorAngle);
-            double foundationOffset = 9 - (34.5 / 2);
+        fieldDist = Math.sqrt(robotOnField.x*robotOnField.x + robotOnField.y*robotOnField.y);
 
-            blueFoundX = fieldX + foundationOffset*Math.cos(Math.toRadians(fakeAngle));
-            blueFoundY = fieldY + foundationOffset*Math.sin(Math.toRadians(fakeAngle));
-            blueFoundTheta = fakeAngle + 90;
-        }
-        if(haveSkyStone){
-            double stoneOffset = 10;//Distance from robot rotation center in inches, assume along x
-
-            if(!stoneLocated){
-                if(fieldX > 0){
-                    stoneOffset = -9;//Distance from robot rotation center in inches, assume along x
-                }
-                stoneX = fieldX + stoneOffset;
-                stoneY = fieldY;
-                stoneTheta += (fakeAngle - priorAngle);
-                stoneLocated = true;
-            }
-            else {
-
-                stoneX = fieldX + stoneOffset*Math.cos(Math.toRadians(fakeAngle));
-                stoneY = fieldY + stoneOffset*Math.sin(Math.toRadians(fakeAngle));
-                stoneTheta = fakeAngle;
-
-
-            }
-        }
-
+        gripperX = robotOnField.x + gripperOffset *Math.cos(Math.toRadians(robotOnField.theta));
+        gripperY = robotOnField.y + gripperOffset *Math.sin(Math.toRadians(robotOnField.theta));
+        gripperTheta = robotOnField.theta;
 
         IMUangles.firstAngle = fakeAngle;//Note IMU returns angle in opposite orientation than robot coordinate system
         //IMU + angle = CCW ; robot + angle = CW
@@ -199,24 +175,23 @@ public  class BNO055IMU{
         frArray[counter] = frCnt;
         brArray[counter] = brCnt;
         blArray[counter] = blCnt;
-        lsArray[counter] = lsCnt;
+        jackArray[counter] = jackCnt;
         FLBRArray[counter] = robotFLBRCount;
         FRBLArray[counter] = robotFRBLCount;
         robotXArray[counter] = robotX;
         robotYArray[counter] = robotY;
         robotDistArray[counter] = robotDist;
         robotAngleArray[counter] =  IMUangles.firstAngle;//use IMU + = CCW convention for visualization
-        fieldXArray[counter] = fieldX;
-        fieldYArray[counter] = fieldY;
+//        fieldXArray[counter] = fieldX;
+//        fieldYArray[counter] = fieldY;
         fieldDistArray[counter] = fieldDist;
-        RedFoundationPoints.add(new FieldLocation(redFoundX,redFoundY,redFoundTheta));
-        BlueFoundationPoints.add(new FieldLocation(blueFoundX,blueFoundY,blueFoundTheta));
-        SkyStonePoints.add(new FieldLocation(stoneX,stoneY,stoneTheta));
+//        RedFoundationPoints.add(new FieldLocation(redFoundX,redFoundY,redFoundTheta));
+//        BlueFoundationPoints.add(new FieldLocation(blueFoundX,blueFoundY,blueFoundTheta));
+//        SkyStonePoints.add(new FieldLocation(stoneX,stoneY,stoneTheta));
+        GripperPoints.add(new FieldLocation(gripperX,gripperY,gripperTheta));
+        RobotPoints.add(new FieldLocation(robotOnField.x,robotOnField.y,robotOnField.theta));
 
         counter+=1;
-
-
-
         return IMUangles;
     }
 

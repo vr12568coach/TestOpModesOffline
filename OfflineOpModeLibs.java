@@ -42,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -62,10 +63,16 @@ public class OfflineOpModeLibs extends BasicAuto {
 //****************************************
 // DECLARE VARIABLES NEEDED FOR TEST CODE
 //****************************************
+    private FieldConfiguration fc = new FieldConfiguration();
+    boolean writeBF = false;
+    boolean writeRF = false;
+    boolean writeBS1 = false;
+    boolean writeBS2 = false;
+    boolean writeRS1 = false;
+    boolean writeRS2 = false;
 
     int counter;
     final static int size = 300;
-//    int[] totalCounts = new int[size];
     int[] flCounts = new int[size];
     int[] frCounts = new int[size];
     int[] brCounts = new int[size];
@@ -74,7 +81,12 @@ public class OfflineOpModeLibs extends BasicAuto {
     int[] frIMU = new int[size];
     int[] brIMU = new int[size];
     int[] blIMU = new int[size];
-    int[] lsIMU = new int[size];
+    int[] jackIMU = new int[size];
+    double[] gripIMU = new double[size];
+    double[] blueStoneServoIMU = new double[size];
+    double[] redStoneServoIMU = new double[size];
+
+
     double[] arrayRobotX = new double[size];
     double[] arrayRobotY= new double[size];
     double[] arrayRobotDist = new double[size];
@@ -87,11 +99,7 @@ public class OfflineOpModeLibs extends BasicAuto {
     double[] arrayFieldY= new double[size];
     double[] arrayFieldDist = new double[size];
 
-//    double distanceTraveledInchAlt;
-//    static double[] altDistArray = new double[size];
-    static double[] distanceTraveledArray= new double[size];;
     double[] timeArray= new double[size];
-//    static int maxCounts = (int) Math.round(driveDistance*ROBOT_INCH_TO_MOTOR_DEG*DEGREES_TO_COUNTS);
     public double timeStep = 1000 * 30/size;//determined a fixed time step (in milliseconds) so that faster speeds will show shorter time to distance
     //timeStep was 100 in seconds to fill 30 seconds / size of array (counts to 30
     static FileReader in = null;
@@ -99,8 +107,15 @@ public class OfflineOpModeLibs extends BasicAuto {
     static FileOutputStream fileOutStream = null;
     static DataOutputStream dataOutStream = null;
     static DataOutputStream dos = null;
+    static FileOutputStream fos = null;
+    public String SelectedOpMode = null;
 
+    static String fileLocation;
+    static computer location;
     int IMUCounter =0;
+
+    public boolean opModeIsRunning = true;
+
 
     /* Constructor */
     public OfflineOpModeLibs(){
@@ -113,15 +128,16 @@ public class OfflineOpModeLibs extends BasicAuto {
     //----------------------------------------------------------------------------------------------
     public void extractArrayData(){
 
-//        telemetry.addData("Distance", " Command(%.2f), Current(%.2f)", commandInch, distanceTraveledInch);
-//        telemetry.addData("control loop:", "Current Error(%.1f), Sum Error(%.1f), Steering Power(%.1f)", error, sumError, steerInput);
-//        telemetry.update();
+
         flIMU = Billy.imu.flArray;
         frIMU = Billy.imu.frArray;
         brIMU = Billy.imu.brArray;
         blIMU = Billy.imu.blArray;
-        lsIMU = Billy.imu.lsArray;
+        jackIMU = Billy.imu.jackDirection;
+        gripIMU  = Billy.imu.gripperWidth;
+
         timeArray = Billy.imu.timeArray;
+
         arrayRobotX = Billy.imu.robotXArray;
         arrayRobotY = Billy.imu.robotYArray;
         arrayRobotDist = Billy.imu.robotDistArray;
@@ -135,43 +151,59 @@ public class OfflineOpModeLibs extends BasicAuto {
 //        robotY = Billy.imu.robotY;
 //        robotDist = Billy.imu.robotDist;
 //        robotAngle = (double) Billy.imu.fakeAngle;
-        arrayFieldX = Billy.imu.fieldXArray;
-        arrayFieldY= Billy.imu.fieldYArray;
-        arrayFieldDist = Billy.imu.fieldDistArray;
-
-        Arrays.fill(flIMU,IMUCounter,(size), flIMU[IMUCounter-1]);
-        Arrays.fill(frIMU,IMUCounter,(size), frIMU[IMUCounter-1]);
-        Arrays.fill(brIMU,IMUCounter,(size), brIMU[IMUCounter-1]);
-        Arrays.fill(blIMU,IMUCounter,(size), blIMU[IMUCounter-1]);
-
-
-        Arrays.fill(arrayFLBR,IMUCounter,(size),arrayFLBR[IMUCounter-1]);
-        Arrays.fill(arrayFRBL,IMUCounter,(size),arrayFRBL[IMUCounter-1]);
-
-        Arrays.fill(arrayRobotX,IMUCounter,(size),arrayRobotX[IMUCounter-1]);
-        Arrays.fill(arrayRobotY,IMUCounter,(size),arrayRobotY[IMUCounter-1]);
+//        arrayFieldX = Billy.imu.fieldXArray;
+//        arrayFieldY= Billy.imu.fieldYArray;
+//        arrayFieldDist = Billy.imu.fieldDistArray;
+//
+//        Arrays.fill(flIMU,IMUCounter,(size), flIMU[IMUCounter-1]);
+//        Arrays.fill(frIMU,IMUCounter,(size), frIMU[IMUCounter-1]);
+//        Arrays.fill(brIMU,IMUCounter,(size), brIMU[IMUCounter-1]);
+//        Arrays.fill(blIMU,IMUCounter,(size), blIMU[IMUCounter-1]);
+//
+//
+//        Arrays.fill(arrayFLBR,IMUCounter,(size),arrayFLBR[IMUCounter-1]);
+//        Arrays.fill(arrayFRBL,IMUCounter,(size),arrayFRBL[IMUCounter-1]);
+//
+//        Arrays.fill(arrayRobotX,IMUCounter,(size),arrayRobotX[IMUCounter-1]);
+//        Arrays.fill(arrayRobotY,IMUCounter,(size),arrayRobotY[IMUCounter-1]);
         Arrays.fill(arrayRobotDist,IMUCounter,(size),arrayRobotDist[IMUCounter-1]);
         Arrays.fill(arrayRobotAngle,IMUCounter,(size),arrayRobotAngle[IMUCounter-1]);
 
 //        Arrays.fill(RX,counter,(size),RX[counter-1]);
 //        Arrays.fill(RY,counter,(size),RY[counter-1]);
-
-        Arrays.fill(arrayFieldX,IMUCounter,(size),arrayFieldX[IMUCounter-1]);
-        Arrays.fill(arrayFieldY,IMUCounter,(size),arrayFieldY[IMUCounter-1]);
+//
+//        Arrays.fill(arrayFieldX,IMUCounter,(size),arrayFieldX[IMUCounter-1]);
+//        Arrays.fill(arrayFieldY,IMUCounter,(size),arrayFieldY[IMUCounter-1]);
         Arrays.fill(arrayFieldDist,IMUCounter,(size),arrayFieldDist[IMUCounter-1]);
-//        Arrays.fill(FX,counter,(size),FX[counter-1]);
-//        Arrays.fill(FY,counter,(size),FY[counter-1]);
-//        Arrays.fill(FDist,counter,(size),FDist[counter-1]);
 
-        Arrays.fill(distanceTraveledArray,IMUCounter, size, distanceTraveledArray[IMUCounter-1]);
-//        Arrays.fill(altDistArray,counter,(size),altDistArray[counter-1]);
+// ----------------- ADDED CODE NOT IN "coach" version ERROR? ---------------------
+        //missing 1 point in field array vs robot array list
+        fc.BlueFoundationPoints.add(fc.BlueFoundationPoints.get(IMUCounter-2));
+        fc.RedFoundationPoints.add(fc.RedFoundationPoints.get(IMUCounter-2));
+
+        fc.RedSkyStone1Points.add(fc.RedSkyStone1Points.get(IMUCounter-2));
+        fc.BlueSkyStone1Points.add(fc.BlueSkyStone1Points.get(IMUCounter-2));
+
+        fc.BlueSkyStone2Points.add(fc.BlueSkyStone2Points.get(IMUCounter-2));
+        fc.RedSkyStone2Points.add(fc.RedSkyStone2Points.get(IMUCounter-2));
+
+// ----------------- ADDED CODE NOT IN "coach" version ERROR? ---------------------
+
         double deltaTime = (timeArray[1] - timeArray[0]);
-        for(int k = IMUCounter; k < size;k++){
+        for(int k = IMUCounter; k < size;k++){// needed to reduce counter by 1 -- means there is an extra count somewhere
             timeArray[k] = timeArray[k-1] + deltaTime;
-            Billy.imu.RedFoundationPoints.add(Billy.imu.RedFoundationPoints.get(k-1));
-            Billy.imu.BlueFoundationPoints.add(Billy.imu.BlueFoundationPoints.get(k-1));
-            Billy.imu.SkyStonePoints.add(Billy.imu.SkyStonePoints.get(k-1));
+            Billy.imu.RobotPoints.add(Billy.imu.RobotPoints.get(k-1));
+            Billy.imu.GripperPoints.add(Billy.imu.GripperPoints.get(k-1));
 
+
+            fc.BlueFoundationPoints.add(fc.BlueFoundationPoints.get(k-1));
+            fc.RedFoundationPoints.add(fc.RedFoundationPoints.get(k-1));
+
+            fc.RedSkyStone1Points.add(fc.RedSkyStone1Points.get(k-1));
+            fc.BlueSkyStone1Points.add(fc.BlueSkyStone1Points.get(k-1));
+
+            fc.BlueSkyStone2Points.add(fc.BlueSkyStone2Points.get(k-1));
+            fc.RedSkyStone2Points.add(fc.RedSkyStone2Points.get(k-1));
         }
 
     }
@@ -180,6 +212,7 @@ public class OfflineOpModeLibs extends BasicAuto {
     // TEST MODE CODE ONLY - WRITES DATA TO FILE
     //----------------------------------------------------------------------------------------------
     public void writeToFile( FileWriter out, DataOutputStream fileData){
+        //Delete FileWriter Portion or entire method??
         int countVar = Math.max(size, IMUCounter);
 
         try {
@@ -190,7 +223,7 @@ public class OfflineOpModeLibs extends BasicAuto {
             for (int i = 0; i < countVar; i++) {
 //                out.write(String.format("%d,%d,%d,%d,%d,", i,  flCounts[i], frCounts[i], brCounts[i], blCounts[i]));
                 out.write(String.format("%.3f,%d,%d,%d,%d,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f",
-                        timeArray[i], flIMU[i], frIMU[i], brIMU[i], blIMU[i], lsIMU[i],
+                        timeArray[i], flIMU[i], frIMU[i], brIMU[i], blIMU[i], jackIMU[i],
                         arrayFLBR[i],arrayFRBL[i],arrayRobotY[i], arrayRobotX[i], arrayRobotAngle[i],
                         arrayFieldY[i], arrayFieldX[i]));
                 out.write(String.format("\n"));
@@ -275,54 +308,61 @@ public class OfflineOpModeLibs extends BasicAuto {
         }
 
     }
-    //----------------------------------------------------------------------------------------------
-    // TEST MODE CODE ONLY - WRITES DATA TO SCREEN
-    //----------------------------------------------------------------------------------------------
-    public void writeToScreen(){
 
-        System.out.println(String.format("Calculated Counts\r"));
-        System.out.println(String.format("Time,FLcalc,FRcalc,BRcalc,BLcalc,FLBR_cnt, FRBL_cnt\r"));
+    //----------------------------------------------------------------------------------------------
+    // TEST MODE CODE ONLY - WRITES DATA TO FILE
+    //----------------------------------------------------------------------------------------------
+    public void writeExtrasToFile(FileOutputStream fos){
         int countVar = Math.max(size, IMUCounter);
-        for(int i=0; i<countVar; i++) {
-//            System.out.print(String.format("%d,%d,%d,%d,%d,", i, flCounts[i], frCounts[i], brCounts[i], blCounts[i]));
-            System.out.print(String.format("%.3f,%d,%d,%d,%d,%.1f,%.1f",timeArray[i], flIMU[i], frIMU[i], brIMU[i], blIMU[i],
-                    arrayFLBR[i],arrayFRBL[i]));
-            System.out.println(String.format(" "));
-        }
-        System.out.println(String.format("-----------------------"));
-        System.out.println("Robot Motion Final Values");
-        System.out.println(String.format("%.3f Robot final rotation angle (deg.)",arrayRobotAngle[size-1]));
-        System.out.println(String.format("%.3f Robot final X distance (in.)",arrayRobotX[size-1]));
-        System.out.println(String.format("%.3f Robot final Y distance (in.)",arrayRobotY[size-1]));
-        System.out.println(String.format("%.3f Robot final total distance (in.)",arrayRobotDist[size-1]));
-        System.out.println(String.format("-----------------------"));
 
-//        System.out.println(String.format("Final Distance: %.3f",distanceTraveledArray[distanceTraveledArray.length-1]));
-//        System.out.println(String.format("Final Error: %.3f", arrayRobotDist[size-1] - distanceTraveledArray[distanceTraveledArray.length-1]));
-//        System.out.println(String.format("-----------------------"));
-        System.out.println(String.format(" "));
 
-        System.out.println("Distance Traveled Array Values");
-        System.out.println("Time,Distance Travel, FieldX, FieldY, RobotDist, Angle");
+        try {
 
-        for(int j =0; j<distanceTraveledArray.length; j++){
-            System.out.println(String.format("%.3f,%.3f,%.3f,%.3f,%.3f,%.1f\r",timeArray[j],distanceTraveledArray[j],arrayFieldX[j],arrayFieldY[j],arrayRobotDist[j],arrayRobotAngle[j]));
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+
+//          Write the data in text format that can be read back in by the Java visualization programs in IntelliJ
+//          Only writing out the FieldLocation X,Y, Theta as formatted for reading in, Used for foundations,stones, robot, and gripper
+            for (int j = 0; j < size; j++) {
+                // writes the data as text for each value in the array
+                osw.write(Integer.toString(jackIMU[j])+"\t");   // Jack motion
+                osw.write(Double.toString(gripIMU[j])+"\n");   // gripper motion
+            }
+            if(osw != null){
+                osw.flush();
+                osw.close();
+            }
 
         }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println(String.format("Error occurred","%S",e));
+        }
+
+
     }
+
+
     //----------------------------------------------------------------------------------------------
     // TEST MODE CODE ONLY - UPDATES FAKE IMU
     //----------------------------------------------------------------------------------------------
     @Override
     public void updateIMU(){
+        //Move this imu portion to robot update method
         Billy.imu.flCnt = Billy.frontLeft.getCurrentPosition();
         Billy.imu.frCnt = Billy.frontRight.getCurrentPosition();
         Billy.imu.brCnt = Billy.backRight.getCurrentPosition();
         Billy.imu.blCnt = Billy.backLeft.getCurrentPosition();
 
-        Billy.imu.haveBlueFoundation = haveBlueFoundation;
-        Billy.imu.haveRedFoundation = haveRedFoundation;
-        Billy.imu.haveSkyStone = haveSkyStone;
+        fc.updateField(this);
+
+        robotSeeStone= fc.stoneFound;
+
+        if(haveBlueFoundation){writeBF = true;}
+        if(haveRedFoundation){writeRF = true;}
+        if(haveBlueSkyStone1){writeBS1 = true;}
+        if(haveBlueSkyStone2){writeBS2 = true;}
+        if(haveRedSkyStone1){writeRS1 = true;}
+        if(haveRedSkyStone2){writeRS2 = true;}
 
         try {
 //
@@ -332,7 +372,6 @@ public class OfflineOpModeLibs extends BasicAuto {
             } catch (ArithmeticException e) {
                 System.out.println(String.format("Exceeded %d counter steps", size));
                 System.out.println(String.format("IMU Counter = %d", IMUCounter));
-//                distanceTraveledInch = driveDistance;
             }
 
 
@@ -347,7 +386,11 @@ public class OfflineOpModeLibs extends BasicAuto {
        //Needs to be run before runOpMode or inherited init
        //Added code to try to use library version of hardware
        Billy.isTestMode = true;
-       activeOpMode = true;
+//       activeOpMode = true;// already done in MAIN
+
+       stoneSelect = 1;
+       fc = new FieldConfiguration(stoneSelect);//KS added 12/20 to set stone position
+
        // Map all of hardware to program from robot using HardwareVincent script
        //Will refer all defined configuration items - motors, servos, sensors- to this defined Billy class
 //        createRobot();
@@ -360,10 +403,18 @@ public class OfflineOpModeLibs extends BasicAuto {
        Billy.backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
        Billy.backRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
+       Billy.jackLeadScrew.setDirection(DcMotorSimple.Direction.FORWARD);
+       Billy.gripper.setDirection(DcMotorSimple.Direction.FORWARD);
+
+
        Billy.frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
        Billy.frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
        Billy.backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
        Billy.backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+       Billy.jackLeadScrew.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       Billy.gripper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
        //Reset all motor encoders
        Billy.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -376,48 +427,28 @@ public class OfflineOpModeLibs extends BasicAuto {
        Billy.backLeft.setTargetPosition(0);
        Billy.backRight.setTargetPosition(0);
 
+       Billy.jackLeadScrew.setTargetPosition(0);
+       Billy.gripper.setTargetPosition(0);
+
+
        //Set all motors to position mode (assumes that all motors have encoders on them)
        Billy.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
        Billy.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
        Billy.backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
        Billy.backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+       Billy.jackLeadScrew.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+       Billy.gripper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
        Billy.frontLeft.setPower(0);
        Billy.frontRight.setPower(0);
        Billy.backLeft.setPower(0);
        Billy.backRight.setPower(0);
 
-//       targetsSkyStone = this.vuforia.loadTrackablesFromAsset("Skystone");
-//
-//
-//       VuforiaTrackable stoneTarget = targetsSkyStone.get(0);
-//       stoneTarget.setName("Stone Target");
-//       VuforiaTrackable blueRearBridge = targetsSkyStone.get(1);
-//       blueRearBridge.setName("Blue Rear Bridge");
-//       VuforiaTrackable redRearBridge = targetsSkyStone.get(2);
-//       redRearBridge.setName("Red Rear Bridge");
-//       VuforiaTrackable redFrontBridge = targetsSkyStone.get(3);
-//       redFrontBridge.setName("Red Front Bridge");
-//       VuforiaTrackable blueFrontBridge = targetsSkyStone.get(4);
-//       blueFrontBridge.setName("Blue Front Bridge");
-//       VuforiaTrackable red1 = targetsSkyStone.get(5);
-//       red1.setName("Red Perimeter 1");
-//       VuforiaTrackable red2 = targetsSkyStone.get(6);
-//       red2.setName("Red Perimeter 2");
-//       VuforiaTrackable front1 = targetsSkyStone.get(7);
-//       front1.setName("Front Perimeter 1");
-//       VuforiaTrackable front2 = targetsSkyStone.get(8);
-//       front2.setName("Front Perimeter 2");
-//       VuforiaTrackable blue1 = targetsSkyStone.get(9);
-//       blue1.setName("Blue Perimeter 1");
-//       VuforiaTrackable blue2 = targetsSkyStone.get(10);
-//       blue2.setName("Blue Perimeter 2");
-//       VuforiaTrackable rear1 = targetsSkyStone.get(11);
-//       rear1.setName("Rear Perimeter 1");
-//       VuforiaTrackable rear2 = targetsSkyStone.get(12);
-//       rear2.setName("Rear Perimeter 2");
-//
-//       allTrackables.addAll(targetsSkyStone);
+       Billy.jackLeadScrew.setPower(0);
+       Billy.gripper.setPower(0);
+
 
        readOrWriteHashMapOffline();
 
@@ -437,26 +468,51 @@ public class OfflineOpModeLibs extends BasicAuto {
        Billy.backRight.timeStep = timeStep;
        Billy.backLeft.timeStep = timeStep;
 
-       Billy.imu.RedFoundationPoints.add(new FieldLocation(Billy.imu.redFoundX,Billy.imu.redFoundY,Billy.imu.redFoundTheta));
-       Billy.imu.BlueFoundationPoints.add(new FieldLocation(Billy.imu.blueFoundX,Billy.imu.blueFoundY,Billy.imu.blueFoundTheta));
-       Billy.imu.SkyStonePoints.add(new FieldLocation(Billy.imu.stoneX,Billy.imu.stoneY,Billy.imu.stoneTheta));
+       Billy.jackLeadScrew.timeStep = timeStep;
+       Billy.gripper.timeStep = timeStep;
+
+       fc.RedFoundationPoints.clear();
+       fc.RedFoundationPoints.add(new FieldLocation(fc.redFound.x,fc.redFound.y,fc.redFound.theta));
+
+       fc.BlueFoundationPoints.clear();
+       fc.BlueFoundationPoints.add(new FieldLocation(fc.blueFound.x,fc.blueFound.y,fc.blueFound.theta));
+
+       fc.BlueSkyStone1Points.clear();
+       fc.BlueSkyStone1Points.add(new FieldLocation(fc.blueStone1.x,fc.blueStone1.y,fc.blueStone1.theta));
+
+       fc.RedSkyStone1Points.clear();
+       fc.RedSkyStone1Points.add(new FieldLocation(fc.redStone1.x,fc.redStone1.y,fc.redStone1.theta));
+
+       fc.BlueSkyStone2Points.clear();
+       fc.BlueSkyStone2Points.add(new FieldLocation(fc.blueStone2.x,fc.blueStone2.y,fc.blueStone2.theta));
+
+       fc.RedSkyStone2Points.clear();
+       fc.RedSkyStone2Points.add(new FieldLocation(fc.redStone2.x,fc.redStone2.y,fc.redStone2.theta));
+
+       Billy.imu.GripperPoints.clear();
+       Billy.imu.GripperPoints.add(new FieldLocation(Billy.imu.gripperX, Billy.imu.gripperY, Billy.imu.gripperTheta));
+
+       Billy.imu.RobotPoints.clear();
+       Billy.imu.RobotPoints.add(new FieldLocation(Billy.imu.robotOnField.x, Billy.imu.robotOnField.y, Billy.imu.robotOnField.theta));
 
        //Setting counter to capture array data is unique to offline running of code
        counter = 1;
        Billy.imu.counter = counter;
-       Billy.robotNumber = 1;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       foundationPosChange = 26;// 26 for unmoved Foundation, 0 for moved Foundation
-       insideOutside = 0;// 0 for Inside, 24 for Outside
-       foundationInOut = 26;// 0 for Inside, 26 for Outside
-       sideColor = 1;// + for Blue, - for Red
+//
+//       Billy.robotNumber = 1;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//       foundationPosChange = 0;// 26 for unmoved Foundation, 0 for moved Foundation
+//       insideOutside = 0;// 0 for Inside, 24 for Outside
+//       foundationInOut = 26;// 0 for Inside, 26 for Outside
+//       sideColor = 1;// + for Blue, - for Red
 
        if(Billy.robotNumber == 1) {
            cons.pHM.get("drivePowerLimit").setParameter(0.75);
 //           Billy.frontLeft.motorTol=1.2;
 //           Billy.backLeft.motorTol=1.2;
            //field angle orientation is + = CCW , while robot frame is + = CW
-           Billy.imu.fieldX = -63;//initial x position on field in inches
-           Billy.imu.fieldY = -28;//initial y position on field in inches
+           Billy.imu.robotOnField.x = -63;//initial x position on field in inches
+           Billy.imu.robotOnField.y = -28;//initial y position on field in inches
+           Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
        }
@@ -468,8 +524,9 @@ public class OfflineOpModeLibs extends BasicAuto {
 //           Billy.backLeft.motorTol=1.2;
 //
            //field angle orientation is + = CCW , while robot frame is + = CW
-           Billy.imu.fieldX = -63;//initial x position on field in inches
-           Billy.imu.fieldY = 48;//initial y position on field in inches
+           Billy.imu.robotOnField.x = -63;//initial x position on field in inches
+           Billy.imu.robotOnField.y = 48;//initial y position on field in inches
+           Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
            telemetry.addData("Robot Number ", "%d",Billy.robotNumber);
@@ -478,13 +535,41 @@ public class OfflineOpModeLibs extends BasicAuto {
            telemetry.update();
        }
 
-       //Initialize starting position on field, field cent eris assumed (0,0), 0 field angle is pointing EAST
-       Billy.imu.fieldXArray[0] = Billy.imu.fieldX; //initial x position on field in inches
-       Billy.imu.fieldYArray[0] = Billy.imu.fieldY; //initial y position on field in inches
-       Billy.imu.robotAngleArray[0] = Billy.imu.priorAngle; //initial robot angle orientation on field in degrees from EAST
+       if(Billy.robotNumber == 3) {
+           cons.pHM.get("drivePowerLimit").setParameter(0.75);
+//           Billy.frontLeft.motorTol=1.2;
+//           Billy.backLeft.motorTol=1.2;
+           //field angle orientation is + = CCW , while robot frame is + = CW
+           Billy.imu.robotOnField.x = 63;//initial x position on field in inches
+           Billy.imu.robotOnField.y = -28;//initial y position on field in inches
+           Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
+       }
+
+       if(Billy.robotNumber == 4) {
+
+           Billy.imu.robotOnField.x = 63;//initial x position on field in inches
+           Billy.imu.robotOnField.y = 48;//initial y position on field in inches
+           Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
+           Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
+           telemetry.addData("Robot Number ", "%d",Billy.robotNumber);
+           telemetry.addData("drivePowerLimit ", "%.2f",cons.pHM.get("drivePowerLimit").value);
+
+           telemetry.update();
+       }
+
+       //Initialize starting position on field, field center is assumed (0,0), 0 field angle is pointing EAST
+//       Billy.imu.fieldXArray[0] = Billy.imu.fieldX; //initial x position on field in inches
+//       Billy.imu.fieldYArray[0] = Billy.imu.fieldY; //initial y position on field in inches
+//       Billy.imu.robotAngleArray[0] = Billy.imu.priorAngle; //initial robot angle orientation on field in degrees from EAST
+//       Billy.imu.RobotPoints.add(new FieldLocation(Billy.imu.robotOnField.x, Billy.imu.robotOnField.y, Billy.imu.robotOnField.theta));
 
    }
 
+
+   public enum computer{PC,MAC,WILL};
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // INSERT ACTUAL CODE TO BE TESTED IN METHODS
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -495,7 +580,31 @@ public class OfflineOpModeLibs extends BasicAuto {
     @Override
     public void initialize() {
 
+        haveBlueFoundation = false;
+        haveRedFoundation= false;
+        haveBlueSkyStone1= false;
+        haveBlueSkyStone2= false;
+        haveRedSkyStone1= false;
+        haveRedSkyStone2= false;
 
+        writeBF = false;
+        writeRF = false;
+        writeBS1 = false;
+        writeBS2 = false;
+        writeRS1 = false;
+        writeRS2 = false;
+
+        switch(location){
+            case PC:
+                fileLocation = "C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/";
+            break;
+            case MAC:
+                fileLocation = "/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/";
+            break;
+            case WILL:
+                fileLocation = "/";
+            break;
+        }
     }
     @Override
     public void runOpMode(){
@@ -504,7 +613,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 
         runtime.reset();
 
-        if(Billy.robotNumber ==1) {
+        if(Billy.robotNumber ==1 || Billy.robotNumber ==3) {
 
             fwdToStone();
 
@@ -515,10 +624,14 @@ public class OfflineOpModeLibs extends BasicAuto {
             getSecondStone();
 
         }
-        if(Billy.robotNumber ==2) {
+        if(Billy.robotNumber ==2 || Billy.robotNumber ==4 ) {
             if(foundationPosChange == 26){
 
-                drv.driveGeneral(DriveMethods.moveDirection.RightLeft,-50, cons.pHM.get("drivePowerLimit").value, "Left 30 inches",this);
+                drv.driveGeneral(DriveMethods.moveDirection.RightLeft,-50*sideColor, cons.pHM.get("drivePowerLimit").value, "Left 30 inches",this);
+                //KS COMMENT 12/20/19 - need to add sideColor to correct motion for blue/red
+                if(Billy.robotNumber ==2){writeBF = true;}
+                if(Billy.robotNumber ==4){writeRF = true;}
+                // Added if statements to write foundation files to clear old data
             }
 
             if(foundationPosChange != 26) {
@@ -551,37 +664,73 @@ public class OfflineOpModeLibs extends BasicAuto {
         OffLibs.activeOpMode = true;
         // Prepare robot class for offline operation, must be run prior to copied runOpMode or init
         // Sets initial position and counters and initial array variables
-        OffLibs.prepOpMode();
 
-        StringBuilder fileName = new StringBuilder();
-        fileName.append("RMO_");
-        fileName.append(String.format("%s.csv","RuckusAutonomous01"));
-        out = new FileWriter(fileName.toString());
-        //============= SET ROBOT 1 or 2 to WRITE DATA ==============
-//        fileOutStream = new FileOutputStream("C:/Users/Spiessbach/Documents/GitHub/OfflineViz/RobotOnField.dat");// Path to directory for IntelliJ code
-//        fileOutStream = new FileOutputStream("C:/Users/Spiessbach/Documents/GitHub/OfflineCode/Robot1OnField.dat");// Path to directory for IntelliJ code
-        fileOutStream = new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/"+String.format("Robot%dOnField.dat",OffLibs.Billy.robotNumber));// Path to directory for IntelliJ code
+        OffLibs.location = computer.PC;//For Karl on HP
+//        OffLibs.location = computer.MAC;//For Caleb
+//        OffLibs.location = computer.WILL;//For William
 
-        dataOutStream = new DataOutputStream(fileOutStream);
+
+        for(int h = 1; h<5;h++) {
+
+            OffLibs.Billy.robotNumber = h;//!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            OffLibs.foundationPosChange = 26;// 26 for unmoved Foundation, 0 for moved Foundation
+            OffLibs.insideOutside = 24;// 0 for Inside, 24 for Outside
+            OffLibs.foundationInOut = 0;// 0 for Inside, 26 for Outside
+            if(h ==1 || h==2) {
+                OffLibs.sideColor = 1;// + for Blue for robots 1 & 2
+            }
+            else {
+                OffLibs.sideColor = -1;// - for Red for robots 3 & 4
+
+            }
+            OffLibs.prepOpMode();
+
 //calls code input by programmer into runAutonomous method that comes from main runOpMode
-        OffLibs.runOpMode();
+            OffLibs.runOpMode();
 // Lines below are to capture the array data and output
-        OffLibs.extractArrayData();
-        OffLibs.writeToFile(out, dataOutStream);
-//        OffLibs.writeToScreen();
-        fileOutStream.close();
+            OffLibs.extractArrayData();
+            int countVar = Math.max(size, OffLibs.IMUCounter);
 
-        dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/SkyStone.dat"));// Path to directory for IntelliJ code
-        OffLibs.writeListToFile(dos, OffLibs.Billy.imu.SkyStonePoints);
+            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dOnField.txt", OffLibs.Billy.robotNumber));// Path to directory for IntelliJ code
+            OffLibs.fc.writeFieldAsText(fos, OffLibs.Billy.imu.RobotPoints, countVar);
 
-        dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/RedFoundation.dat"));// Path to directory for IntelliJ code
-        OffLibs.writeListToFile(dos, OffLibs.Billy.imu.RedFoundationPoints);
+            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dAccessories.txt", OffLibs.Billy.robotNumber));// Path to directory for IntelliJ code
+            OffLibs.writeExtrasToFile(fos);
 
-        dos = new DataOutputStream(new FileOutputStream("/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/BlueFoundation.dat"));// Path to directory for IntelliJ code
-        OffLibs.writeListToFile(dos, OffLibs.Billy.imu.BlueFoundationPoints);
+            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dGripper.txt", OffLibs.Billy.robotNumber));// Path to directory for IntelliJ code
+            OffLibs.fc.writeFieldAsText(fos, OffLibs.Billy.imu.GripperPoints, countVar);
 
-        OffLibs.telemetry.addData("Total Number of Time Steps", "%d",OffLibs.IMUCounter);
-        OffLibs.telemetry.update();
+
+            if (OffLibs.writeRF) {
+                fos = new FileOutputStream(fileLocation + "RedFoundation.txt");// Path to directory for IntelliJ code
+                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.RedFoundationPoints, countVar);
+            }
+            if (OffLibs.writeBF) {
+                fos = new FileOutputStream(fileLocation + "BlueFoundation.txt");// Path to directory for IntelliJ code
+                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.BlueFoundationPoints, countVar);
+            }
+            if (OffLibs.writeRS1 || OffLibs.writeRS2) {
+                fos = new FileOutputStream(fileLocation + "RedSkyStone1.txt");// Path to directory for IntelliJ code
+                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.RedSkyStone1Points, countVar);
+
+                fos = new FileOutputStream(fileLocation + "RedSkyStone2.txt");// Path to directory for IntelliJ code
+                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.RedSkyStone2Points, countVar);
+            }
+            if (OffLibs.writeBS1 || OffLibs.writeBS2) {
+                fos = new FileOutputStream(fileLocation + "BlueSkyStone1.txt");// Path to directory for IntelliJ code
+                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.BlueSkyStone1Points, countVar);
+
+                fos = new FileOutputStream(fileLocation + "BlueSkyStone2.txt");// Path to directory for IntelliJ code
+                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.BlueSkyStone2Points, countVar);
+            }
+
+            OffLibs.telemetry.addData("Total Number of Time Steps", "%d", OffLibs.IMUCounter);
+            OffLibs.telemetry.addData("Completed", "Robot: %d, side: %.0f", h, OffLibs.sideColor);
+                        OffLibs.telemetry.addLine("===================================");
+            OffLibs.telemetry.addLine(" ");
+            OffLibs.telemetry.update();
+
+        }
     }
 
 }
