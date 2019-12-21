@@ -16,11 +16,12 @@ public class Servo {
     }
     public void setPosition(double position){
         targetPosition = position;
-        double deltaPosition;
-        if(fakeServoPosition != targetPosition) {
-            deltaPosition = (double) Math.round(servoPower * timeStep);
-            fakeServoPosition += deltaPosition;
-        }
+        fakeServoPosition = targetPosition;
+//        double deltaPosition;
+//        if(fakeServoPosition != targetPosition) {
+//            deltaPosition = (double) Math.round(servoPower * timeStep);
+//            fakeServoPosition += deltaPosition;
+//        }
     }
 
 

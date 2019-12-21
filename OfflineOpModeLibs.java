@@ -135,6 +135,9 @@ public class OfflineOpModeLibs extends BasicAuto {
         blIMU = Billy.imu.blArray;
         jackIMU = Billy.imu.jackDirection;
         gripIMU  = Billy.imu.gripperWidth;
+        blueStoneServoIMU  = Billy.imu.blueServoArray;
+        redStoneServoIMU  = Billy.imu.redServoArray;
+
 
         timeArray = Billy.imu.timeArray;
 
@@ -175,7 +178,10 @@ public class OfflineOpModeLibs extends BasicAuto {
 //        Arrays.fill(arrayFieldX,IMUCounter,(size),arrayFieldX[IMUCounter-1]);
 //        Arrays.fill(arrayFieldY,IMUCounter,(size),arrayFieldY[IMUCounter-1]);
         Arrays.fill(arrayFieldDist,IMUCounter,(size),arrayFieldDist[IMUCounter-1]);
-
+        Arrays.fill(jackIMU,IMUCounter,(size),jackIMU[IMUCounter-1]);
+        Arrays.fill(gripIMU,IMUCounter,(size),gripIMU[IMUCounter-1]);
+        Arrays.fill(blueStoneServoIMU,IMUCounter,(size),blueStoneServoIMU[IMUCounter-1]);
+        Arrays.fill(redStoneServoIMU,IMUCounter,(size),redStoneServoIMU[IMUCounter-1]);
 
         double deltaTime = (timeArray[1] - timeArray[0]);
         for(int k = IMUCounter-1; k < size;k++){// needed to reduce counter by 1 -- means there is an extra count somewhere
@@ -313,6 +319,8 @@ public class OfflineOpModeLibs extends BasicAuto {
             for (int j = 0; j < size; j++) {
                 // writes the data as text for each value in the array
                 osw.write(Integer.toString(jackIMU[j])+"\t");   // Jack motion
+                osw.write(Double.toString(blueStoneServoIMU[j])+"\t");   // Blue Stone Servo
+                osw.write(Double.toString(redStoneServoIMU[j])+"\t");   // Red Stone Servo
                 osw.write(Double.toString(gripIMU[j])+"\n");   // gripper motion
             }
             if(osw != null){
@@ -340,6 +348,9 @@ public class OfflineOpModeLibs extends BasicAuto {
         Billy.imu.frCnt = Billy.frontRight.getCurrentPosition();
         Billy.imu.brCnt = Billy.backRight.getCurrentPosition();
         Billy.imu.blCnt = Billy.backLeft.getCurrentPosition();
+
+        Billy.imu.blueStoneServoPos = Billy.servoBlueStoneGrab.getPosition();
+        Billy.imu.redStoneServoPos = Billy.servoRedStoneGrab.getPosition();
 
         fc.updateField(this);
 
@@ -437,6 +448,8 @@ public class OfflineOpModeLibs extends BasicAuto {
        Billy.jackLeadScrew.setPower(0);
        Billy.gripper.setPower(0);
 
+       Billy.servoBlueStoneGrab.setPosition(0);
+       Billy.servoRedStoneGrab.setPosition(0);
 
        readOrWriteHashMapOffline();
 

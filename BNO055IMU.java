@@ -66,6 +66,8 @@ public  class BNO055IMU{
     public int[] brArray=new int[size];
     public int[] blArray=new int[size];
     public int[] jackArray =new int[size];
+    public double[] blueServoArray =new double[size];
+    public double[] redServoArray =new double[size];
 
 
     public double[] FLBRArray=new double[size];
@@ -176,6 +178,10 @@ public  class BNO055IMU{
         brArray[counter] = brCnt;
         blArray[counter] = blCnt;
         jackArray[counter] = jackCnt;
+
+        blueServoArray[counter] = blueStoneServoPos;
+        redServoArray[counter] = redStoneServoPos;
+
         FLBRArray[counter] = robotFLBRCount;
         FRBLArray[counter] = robotFRBLCount;
         robotXArray[counter] = robotX;
