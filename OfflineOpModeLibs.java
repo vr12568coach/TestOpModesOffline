@@ -30,12 +30,14 @@
 package TestOpModesOffline;
 
 
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-import Skystone_14999.DriveMotion.DriveMethods;
+import Skystone_14999.HarwareConfig.HardwareBilly;
 import Skystone_14999.OpModes.Autonomous.BasicAuto;
+import Skystone_14999.OpModes.Autonomous.DoubleSkyStoneDP_InB;
 //import com.qualcomm.robotcore.hardware.HardwareMap;
-//import com.qualcomm.robotcore.robot.Robot;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -71,6 +73,17 @@ public class OfflineOpModeLibs extends BasicAuto {
     boolean writeRS1 = false;
     boolean writeRS2 = false;
 
+    //********** Added to OfflineOpModeLibs - were in BasicAuto or Hardware ******************
+    boolean robotSeeStone = false;
+
+    private int robotNumber = 1;
+
+    //Instantiate the Autonomous OpMode you wish to Run - can be multiple for each of 4 robots
+
+    // Finish instantiations
+
+    //****************** Added above *************************************************
+
     int counter;
     final static int size = 300;
     int[] flCounts = new int[size];
@@ -100,8 +113,15 @@ public class OfflineOpModeLibs extends BasicAuto {
     double[] arrayFieldDist = new double[size];
 
     double[] timeArray= new double[size];
-    public double timeStep = 1000 * 30/size;//determined a fixed time step (in milliseconds) so that faster speeds will show shorter time to distance
-    //timeStep was 100 in seconds to fill 30 seconds / size of array (counts to 30
+    public double timeStep = 150;//determined a fixed time step (in milliseconds) so that faster speeds will show shorter time to distance
+    // relly not the time step but the speed of the motor at maxpower in counts/second
+    //timeStep was 100 in seconds to fill 30 seconds / size of array = 1000 * 30/size;
+    //  Measured motor speed 60 inches in 4.0 seconds @ 0.75 = 60/4.0/0.75 = 20 in/s * 360 / (3.875 * 3.14159) * 4 = 2360 counts/s
+    //  10 time steps = 1 second then 1 time step = 0.1 seconds
+    //    in 1 time step the max speed = 2360 counts/s * 0.1 s = 236 counts adjust to 230
+    // tried 230 but too fast with other driving methods not using IMU, compromised to 150
+
+
     static FileReader in = null;
     static FileWriter out = null;
     static FileOutputStream fileOutStream = null;
@@ -349,8 +369,8 @@ public class OfflineOpModeLibs extends BasicAuto {
         Billy.imu.brCnt = Billy.backRight.getCurrentPosition();
         Billy.imu.blCnt = Billy.backLeft.getCurrentPosition();
 
-        Billy.imu.blueStoneServoPos = Billy.servoBlueStoneGrab.getPosition();
-        Billy.imu.redStoneServoPos = Billy.servoRedStoneGrab.getPosition();
+        Billy.imu.blueStoneServoPos = Billy.stoneServoArm.getPosition();
+//        Billy.imu.redStoneServoPos = Billy.servoRedStoneGrab.getPosition();
 
         fc.updateField(this);
 
@@ -376,89 +396,56 @@ public class OfflineOpModeLibs extends BasicAuto {
 
     }
 
+//    @Override
+//    public void opModeIsActive(){//Need a way to easily have OpMode is Active
+//        //change methods to "condition" && (om.opModeIsActive || om.testModeActive)
+//        //set testModeActive = false in BasicAuto and only override in the Test Offline code
+//
+//    }
+
     //----------------------------------------------------------------------------------------------
     // TEST MODE METHOD prepOpMode is used to initialize offline items - instead of initOpMode
     //----------------------------------------------------------------------------------------------
    public void prepOpMode() {
 
-       //This is the offline version of init that has additional items
-       //Needs to be run before runOpMode or inherited init
-       //Added code to try to use library version of hardware
-       Billy.isTestMode = true;
-//       activeOpMode = true;// already done in MAIN
+   //************* BELOW IS TEST CODE ********************************
 
-       stoneSelect = 1;
+
+       testModeActive = true;// set for each OpMode
+
+
+       stoneSelect = 2;
        fc = new FieldConfiguration(stoneSelect);//KS added 12/20 to set stone position
 
-       // Map all of hardware to program from robot using HardwareVincent script
-       //Will refer all defined configuration items - motors, servos, sensors- to this defined Billy class
-//        createRobot();
+       haveBlueFoundation = false;
+       haveRedFoundation= false;
+       haveBlueSkyStone1= false;
+       haveBlueSkyStone2= false;
+       haveRedSkyStone1= false;
+       haveRedSkyStone2= false;
 
-       Billy.init(hardwareMap);
+       writeBF = false;
+       writeRF = false;
+       writeBS1 = false;
+       writeBS2 = false;
+       writeRS1 = false;
+       writeRS2 = false;
 
-       //Motor configuration, recommend Not Changing - Set all motors to forward direction, positive = clockwise when viewed from shaft side
-       Billy.frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-       Billy.frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
-       Billy.backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-       Billy.backRight.setDirection(DcMotorSimple.Direction.FORWARD);
+       switch(location) {
+           case PC:
+               fileLocation = "C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/";
+               break;
+           case MAC:
+               fileLocation = "/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/";
+               break;
+           case WILL:
+               fileLocation = "/";
+               break;
+       }
 
-       Billy.jackLeadScrew.setDirection(DcMotorSimple.Direction.FORWARD);
-       Billy.gripper.setDirection(DcMotorSimple.Direction.FORWARD);
+       //************* ABOVE IS TEST CODE ********************************
 
-
-       Billy.frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       Billy.frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       Billy.backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       Billy.backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-       Billy.jackLeadScrew.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       Billy.gripper.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
-       //Reset all motor encoders
-       Billy.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       Billy.frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       Billy.backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       Billy.backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-       Billy.frontLeft.setTargetPosition(0);
-       Billy.frontRight.setTargetPosition(0);
-       Billy.backLeft.setTargetPosition(0);
-       Billy.backRight.setTargetPosition(0);
-
-       Billy.jackLeadScrew.setTargetPosition(0);
-       Billy.gripper.setTargetPosition(0);
-
-
-       //Set all motors to position mode (assumes that all motors have encoders on them)
-       Billy.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-       Billy.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-       Billy.backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-       Billy.backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-       Billy.jackLeadScrew.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-       Billy.gripper.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
-       Billy.frontLeft.setPower(0);
-       Billy.frontRight.setPower(0);
-       Billy.backLeft.setPower(0);
-       Billy.backRight.setPower(0);
-
-       Billy.jackLeadScrew.setPower(0);
-       Billy.gripper.setPower(0);
-
-       Billy.servoBlueStoneGrab.setPosition(0);
-       Billy.servoRedStoneGrab.setPosition(0);
-
-       readOrWriteHashMapOffline();
-
-       //Indicate initialization complete and provide telemetry
-       telemetry.addData("Status: ", "Initialized");
-       telemetry.addData("Drive Motors", "FL (%.2f), FR (%.2f), BL (%.2f), BR (%.2f)", Billy.frontLeft.getPower(), Billy.frontRight.getPower(), Billy.backLeft.getPower(), Billy.backRight.getPower());
-       telemetry.addData("Target Positions", "Forward (%d), Right (%d), Rotate (%d)", forwardPosition, rightPosition, clockwisePosition);
-       telemetry.update();//Update telemetry to update display
-
+       initializeMiniBot();
        //***********************************************************
        //Code that needs to be Kept in init to initialize functions
        //***********************************************************
@@ -469,8 +456,8 @@ public class OfflineOpModeLibs extends BasicAuto {
        Billy.backRight.timeStep = timeStep;
        Billy.backLeft.timeStep = timeStep;
 
-       Billy.jackLeadScrew.timeStep = timeStep;
-       Billy.gripper.timeStep = timeStep;
+       Billy.jack.timeStep = timeStep;
+//       Billy.gripper.timeStep = timeStep;
 
        fc.RedFoundationPoints.clear();
        fc.BlueFoundationPoints.clear();
@@ -490,67 +477,85 @@ public class OfflineOpModeLibs extends BasicAuto {
        counter = 1;
        Billy.imu.counter = counter;
 //
-//       Billy.robotNumber = 1;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//       foundationPosChange = 0;// 26 for unmoved Foundation, 0 for moved Foundation
+//       robotNumber = 1;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//       foundationPosChange = 0;// 26 for unmoved FoundationOpMode, 0 for moved FoundationOpMode
 //       insideOutside = 0;// 0 for Inside, 24 for Outside
 //       foundationInOut = 26;// 0 for Inside, 26 for Outside
 //       sideColor = 1;// + for Blue, - for Red
 
-       if(Billy.robotNumber == 1) {
-           cons.pHM.get("drivePowerLimit").setParameter(0.75);
-//           Billy.frontLeft.motorTol=1.2;
-//           Billy.backLeft.motorTol=1.2;
+       if(robotNumber == 1) {
+//           cons.pHM.get("drivePowerLimit").setParameter(1.0);
+           Billy.frontLeft.motorTol=1.0;
+           Billy.frontRight.motorTol=1.0;
+           Billy.backRight.motorTol=1.0;
+           Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
            Billy.imu.robotOnField.x = -63;//initial x position on field in inches
-           Billy.imu.robotOnField.y = -28;//initial y position on field in inches
+           Billy.imu.robotOnField.y = -38;//initial y position on field in inches
            Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
+           Billy.robotHeading = -Billy.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
+
        }
 
-       if(Billy.robotNumber == 2) {
+       if(robotNumber == 2) {
 
-           cons.pHM.get("drivePowerLimit").setParameter(0.75);
-//           Billy.frontLeft.motorTol=1.2;
-//           Billy.backLeft.motorTol=1.2;
-//
+//           cons.pHM.get("drivePowerLimit").setParameter(0.75);
+           Billy.frontLeft.motorTol=1.0;
+           Billy.frontRight.motorTol=1.0;
+           Billy.backRight.motorTol=1.0;
+           Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
            Billy.imu.robotOnField.x = -63;//initial x position on field in inches
            Billy.imu.robotOnField.y = 48;//initial y position on field in inches (WAS 48)
            Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
            Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
-           telemetry.addData("Robot Number ", "%d",Billy.robotNumber);
+           Billy.robotHeading = -Billy.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
+           telemetry.addData("Robot Number ", "%d",robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.pHM.get("drivePowerLimit").value);
 
            telemetry.update();
        }
 
-       if(Billy.robotNumber == 3) {
+       if(robotNumber == 3) {
            cons.pHM.get("drivePowerLimit").setParameter(0.75);
-//           Billy.frontLeft.motorTol=1.2;
-//           Billy.backLeft.motorTol=1.2;
+           Billy.frontLeft.motorTol=1.0;
+           Billy.frontRight.motorTol=1.0;
+           Billy.backRight.motorTol=1.0;
+           Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
            Billy.imu.robotOnField.x = 63;//initial x position on field in inches
-           Billy.imu.robotOnField.y = -28;//initial y position on field in inches
+           Billy.imu.robotOnField.y = -38;//initial y position on field in inches
            Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
+           Billy.robotHeading = -Billy.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
        }
 
-       if(Billy.robotNumber == 4) {
-
+       if(robotNumber == 4) {
+           cons.pHM.get("drivePowerLimit").setParameter(0.75);
+           Billy.frontLeft.motorTol=1.0;
+           Billy.frontRight.motorTol=1.0;
+           Billy.backRight.motorTol=1.0;
+           Billy.backLeft.motorTol=1.0;;
            Billy.imu.robotOnField.x = 63;//initial x position on field in inches
            Billy.imu.robotOnField.y = 48;//initial y position on field in inches (WAS 48)
            Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
            Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
            Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
-           telemetry.addData("Robot Number ", "%d",Billy.robotNumber);
+           Billy.robotHeading = -Billy.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
+           telemetry.addData("Robot Number ", "%d",robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.pHM.get("drivePowerLimit").value);
 
            telemetry.update();
        }
 
+       Billy.angleUnWrap();
+       Billy.offset = Billy.robotHeading;
+       Billy.robotHeading-=Billy.offset;//set robotHeading = 0 for all opModes regardless of position, but track actual angle in IMU
+       fc.updateField(this);
        //Initialize starting position on field, field center is assumed (0,0), 0 field angle is pointing EAST
 //       Billy.imu.fieldXArray[0] = Billy.imu.fieldX; //initial x position on field in inches
 //       Billy.imu.fieldYArray[0] = Billy.imu.fieldY; //initial y position on field in inches
@@ -571,73 +576,167 @@ public class OfflineOpModeLibs extends BasicAuto {
     @Override
     public void initialize() {
 
-        haveBlueFoundation = false;
-        haveRedFoundation= false;
-        haveBlueSkyStone1= false;
-        haveBlueSkyStone2= false;
-        haveRedSkyStone1= false;
-        haveRedSkyStone2= false;
 
-        writeBF = false;
-        writeRF = false;
-        writeBS1 = false;
-        writeBS2 = false;
-        writeRS1 = false;
-        writeRS2 = false;
+        //************** BELOW IS initializeMiniBot() FROM BasicAuto ************************
+//        readOrWriteHashMap();
+//
+//        Billy.initMiniBot(hardwareMap, cons);
+//
+//        //Motor configuration, recommend Not Changing - Set all motors to forward direction, positive = clockwise when viewed from shaft side
+//        Billy.frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+//        Billy.frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+//        Billy.backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+//        Billy.backRight.setDirection(DcMotorSimple.Direction.FORWARD);
+//
+//        Billy.frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        Billy.frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        Billy.backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        Billy.backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//
+//        //Reset all motor encoders
+//        Billy.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        Billy.frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        Billy.backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        Billy.backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//        Billy.frontLeft.setTargetPosition(0);
+//        Billy.frontRight.setTargetPosition(0);
+//        Billy.backLeft.setTargetPosition(0);
+//        Billy.backRight.setTargetPosition(0);
+//
+//        //Set all motors to position mode (assumes that all motors have encoders on them)
+//        Billy.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Billy.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Billy.backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        Billy.backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//        Billy.frontLeft.setPower(0);
+//        Billy.frontRight.setPower(0);
+//        Billy.backLeft.setPower(0);
+//        Billy.backRight.setPower(0);
+//
+//        Billy.stoneServoArm.setPosition(0);
+//
+//        VuforiaTrackable stoneTarget = targetsSkyStone.get(0);
+//        stoneTarget.setName("Stone Target");
+//        VuforiaTrackable blueRearBridge = targetsSkyStone.get(1);
+//        blueRearBridge.setName("Blue Rear Bridge");
+//        VuforiaTrackable redRearBridge = targetsSkyStone.get(2);
+//        redRearBridge.setName("Red Rear Bridge");
+//        VuforiaTrackable redFrontBridge = targetsSkyStone.get(3);
+//        redFrontBridge.setName("Red Front Bridge");
+//        VuforiaTrackable blueFrontBridge = targetsSkyStone.get(4);
+//        blueFrontBridge.setName("Blue Front Bridge");
+//        VuforiaTrackable red1 = targetsSkyStone.get(5);
+//        red1.setName("Red Perimeter 1");
+//        VuforiaTrackable red2 = targetsSkyStone.get(6);
+//        red2.setName("Red Perimeter 2");
+//        VuforiaTrackable front1 = targetsSkyStone.get(7);
+//        front1.setName("Front Perimeter 1");
+//        VuforiaTrackable front2 = targetsSkyStone.get(8);
+//        front2.setName("Front Perimeter 2");
+//        VuforiaTrackable blue1 = targetsSkyStone.get(9);
+//        blue1.setName("Blue Perimeter 1");
+//        VuforiaTrackable blue2 = targetsSkyStone.get(10);
+//        blue2.setName("Blue Perimeter 2");
+//        VuforiaTrackable rear1 = targetsSkyStone.get(11);
+//        rear1.setName("Rear Perimeter 1");
+//        VuforiaTrackable rear2 = targetsSkyStone.get(12);
+//        rear2.setName("Rear Perimeter 2");
+//
+//        allTrackables.addAll(targetsSkyStone);
+//
+//        //Indicate initialization complete and provide telemetry
+//        telemetry.addData("Status: ", "Initialized");
+//        telemetry.addData("Drive Motors", "FL (%.2f), FR (%.2f), BL (%.2f), BR (%.2f)", Billy.frontLeft.getPower(), Billy.frontRight.getPower(), Billy.backLeft.getPower(), Billy.backRight.getPower());
+//        telemetry.addData("Target Positions", "Forward (%d), Right (%d), Rotate (%d)", forwardPosition, rightPosition, clockwisePosition);
+//        telemetry.addData(">", "Press Play to start");
+//        telemetry.update();//Update telemetry to update display
 
-        switch(location){
-            case PC:
-                fileLocation = "C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/";
-            break;
-            case MAC:
-                fileLocation = "/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/";
-            break;
-            case WILL:
-                fileLocation = "/";
-            break;
-        }
+        //************** ABOVE IS initializeMiniBot() FROM BasicAuto ************************
+
     }
     @Override
     public void runOpMode(){
 
-        initialize();
+//        initialize();
 
         runtime.reset();
 
-        if(Billy.robotNumber ==1 || Billy.robotNumber ==3) {
+        if(robotNumber ==1 || robotNumber ==3){
+            runtime.reset();
 
-            fwdToStone();
+            Billy.initIMU(this);
 
-            findSkyStone();
+            fwdToTwoStone();
 
-            crossDropStoneFor2();
+            vuforiaStoneLocateOffline(stoneSelect); //REPLACES THE ACTUAL VUFORIA CODE
 
-            getSecondStone();
+            goToStone();
 
-        }
-        if(Billy.robotNumber ==2 || Billy.robotNumber ==4 ) {
-//            if(foundationPosChange == 26){
-//
-//                drv.driveGeneral(DriveMethods.moveDirection.RightLeft,-50*sideColor, cons.pHM.get("drivePowerLimit").value, "Left 30 inches",this);
-//                //KS COMMENT 12/20/19 - need to add sideColor to correct motion for blue/red
-//                if(Billy.robotNumber ==2){writeBF = true;}
-//                if(Billy.robotNumber ==4){writeRF = true;}
+            takeStone1();
+
+            getStone2();
+
+            takeStone2();
+
+            twoStonePark();
+
+            telemetry.addLine("OpMode Complete");
+            telemetry.update();
+            if(robotNumber ==1) {
+                writeBS1 = true;
+            }
+            if(robotNumber ==3) {
+                writeRS1 = true;
 //                // Added if statements to write foundation files to clear old data
-//            }
-//
-//            if(foundationPosChange != 26) {
-//            grabFoundation();
-//
-//            pullFoundation();
-//
-//            aroundFoundation();
-//
-//            pushFoundation();
-//
-//            awayFromFoundation();
-//
-//            }
-            coachFoundation();
+            }
+        }
+
+        if(robotNumber ==2){
+            if(foundationPosChange == 26) {
+               Billy.IMUDriveFwdRight(HardwareBilly.moveDirection.RightLeft,50*sideColor, 0, "RIGHT/LEFT 50 inches",this);
+
+            }
+            if(foundationPosChange != 26) {
+                runtime.reset();
+
+                Billy.initIMU(this);
+
+                grabFoundation();
+
+                pullFoundation();
+
+                awayFromFoundation();
+
+                telemetry.addLine("OpMode Complete");
+                telemetry.update();
+
+            }
+            writeBF = true;
+        }
+        if(robotNumber ==4 ) {
+            if(foundationPosChange == 26){
+                Billy.IMUDriveFwdRight(HardwareBilly.moveDirection.RightLeft,50*sideColor, 0, "RIGHT/LEFT 50 inches",this);
+            }
+
+            if(foundationPosChange != 26) {
+                runtime.reset();
+
+                Billy.initIMU(this);
+
+                grabFoundation();
+
+                pullFoundation();
+
+                awayFromFoundation();
+
+                telemetry.addLine("OpMode Complete");
+                telemetry.update();
+            }
+            writeRF = true;
+
+
         }
 
     } //MAIN OpMode PROGRAM END
@@ -652,8 +751,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 
 // Code to setup the main program that runs offline, none of this is robot code
         OfflineOpModeLibs OffLibs = new OfflineOpModeLibs();
-        OffLibs.testMode = true;//Declare Test Mode
-        OffLibs.activeOpMode = true;
+        OffLibs.testModeActive = true;
         // Prepare robot class for offline operation, must be run prior to copied runOpMode or init
         // Sets initial position and counters and initial array variables
 
@@ -664,8 +762,8 @@ public class OfflineOpModeLibs extends BasicAuto {
 
         for(int h = 1; h<5;h++) {
 
-            OffLibs.Billy.robotNumber = h;//!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            OffLibs.foundationPosChange = 26;// 26 for unmoved Foundation, 0 for moved Foundation
+            OffLibs.robotNumber = h;//!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            OffLibs.foundationPosChange = 0;// 26 for unmoved FoundationOpMode, 0 for moved FoundationOpMode
             OffLibs.insideOutside = 0;// 0 for Inside, 24 for Outside
             OffLibs.foundationInOut = 26;// 0 for Inside, 26 for Outside
             if(h ==1 || h==2) {
@@ -683,13 +781,13 @@ public class OfflineOpModeLibs extends BasicAuto {
             OffLibs.extractArrayData();
             int countVar = Math.max(size, OffLibs.IMUCounter);
 
-            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dOnField.txt", OffLibs.Billy.robotNumber));// Path to directory for IntelliJ code
+            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dOnField.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
             OffLibs.fc.writeFieldAsText(fos, OffLibs.Billy.imu.RobotPoints, countVar);
 
-            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dAccessories.txt", OffLibs.Billy.robotNumber));// Path to directory for IntelliJ code
+            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dAccessories.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
             OffLibs.writeExtrasToFile(fos);
 
-            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dGripper.txt", OffLibs.Billy.robotNumber));// Path to directory for IntelliJ code
+            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dGripper.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
             OffLibs.fc.writeFieldAsText(fos, OffLibs.Billy.imu.GripperPoints, countVar);
 
 

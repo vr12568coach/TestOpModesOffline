@@ -23,6 +23,17 @@ public class Telemetry {
         TMData[index] =  TelemetryString.toString();
         index +=1;
     }
+
+    public void addData(String caption, Object... args){
+        StringBuilder TelemetryString = new StringBuilder();
+        TelemetryString.append(caption);
+        TelemetryString.append(": ");
+        TelemetryString.append(String.format("%s",args));
+
+        TMData[index] =  TelemetryString.toString();
+        index +=1;
+    }
+
     public void addLine(String caption){
         StringBuilder TelemetryString = new StringBuilder();
         TelemetryString.append(caption);

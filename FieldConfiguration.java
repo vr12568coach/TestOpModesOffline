@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 import CoachCode.CoachOpMode.CoachBasicOpMode;
+import Skystone_14999.OpModes.Autonomous.BasicAuto;
 import Skystone_14999.OpModes.BasicOpMode;
 
 public class FieldConfiguration {
@@ -59,8 +60,8 @@ public class FieldConfiguration {
 
     }
 
-public void updateField(BasicOpMode opMode) {
-            //Foundation and Stone calculations
+public void updateField(BasicAuto opMode) {
+            //FoundationOpMode and Stone calculations
 
     redFound.setHold(opMode.haveRedFoundation);
     blueFound.setHold(opMode.haveBlueFoundation);

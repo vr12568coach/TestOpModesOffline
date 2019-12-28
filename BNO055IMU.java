@@ -115,11 +115,11 @@ public  class BNO055IMU{
 
         gripperWidth[counter] = 12 +gripCnt/200;
 
-        //drive motor claculations
+        //drive motor calculations
 
         int deltaSum = (deltaFL  + deltaFR  + deltaBR  + deltaBL)/4;
         fakeAngle += (float) deltaSum / (params.DEGREES_TO_COUNTS * params.ROBOT_INCH_TO_MOTOR_DEG *
-                params.ROBOT_DEG_TO_WHEEL_INCH * params.adjustedRotate);
+                params.ROBOT_DEG_TO_WHEEL_INCH * params.adjRotate);
         // no change to delta sum to put angle into field coordinates, + sum = CCW --> + IMU angle
         float fake1 = (float) (fakeAngle - priorAngle);
         float fake2 = (float) timeStep;
@@ -130,10 +130,10 @@ public  class BNO055IMU{
 // removed +=
 
         if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)!= Math.signum(deltaBL)){
-            factor = 1/params.adjustedRight;
+            factor = 1/params.adjRight;
         }
         else if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)== Math.signum(deltaBL)) {
-            factor = 1 / params.adjustedRotate;
+            factor = 1 / params.adjRotate;
         }
 
         else {

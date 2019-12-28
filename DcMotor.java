@@ -59,7 +59,7 @@ public class DcMotor {
         }
         else {
             int deltaPosition;
-            deltaPosition = (int) Math.round(this.motorPower*this.timeStep* this.motorTol);
+            deltaPosition = (int) Math.round(this.motorPower*this.timeStep * this.motorTol);
             this.fakePosition += deltaPosition;
         }
         return this.fakePosition;
