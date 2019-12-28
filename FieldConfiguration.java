@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
-import CoachCode.CoachOpMode.CoachBasicOpMode;
 import Skystone_14999.OpModes.Autonomous.BasicAuto;
 import Skystone_14999.OpModes.BasicOpMode;
 
