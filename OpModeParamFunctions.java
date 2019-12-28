@@ -11,8 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 
-import CoachCode.CoachFunctions.OpModeParam;
-import CoachCode.CoachOpMode.CoachBasicOpMode;
+import TestOpModesOffline.OpModeParam;
 import Skystone_14999.OpModes.BasicOpMode;
 
 public class OpModeParamFunctions {
@@ -24,7 +23,6 @@ public class OpModeParamFunctions {
     }
     public void defineParameters() {
         //Create the OpMpdes and place in the hashMap
-// OpModeParam(String tc, String ss, String bs, String ssd, double sd, int cs){
 
         omp.put("RedStoneIn", new OpModeParam("Red", "Front", "In", "Moved", -180, 0,"N"));
         omp.put("RedStoneOut", new OpModeParam("Red", "Front", "Out", "Moved", -180, 0,"N"));
