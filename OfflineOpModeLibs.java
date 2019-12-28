@@ -491,7 +491,7 @@ public class OfflineOpModeLibs extends BasicAuto {
            Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
            Billy.imu.robotOnField.x = -63;//initial x position on field in inches
-           Billy.imu.robotOnField.y = -38;//initial y position on field in inches
+           Billy.imu.robotOnField.y = -36;//initial y position on field in inches
            Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
@@ -520,14 +520,14 @@ public class OfflineOpModeLibs extends BasicAuto {
        }
 
        if(robotNumber == 3) {
-           cons.pHM.get("drivePowerLimit").setParameter(0.75);
+//           cons.pHM.get("drivePowerLimit").setParameter(0.75);
            Billy.frontLeft.motorTol=1.0;
            Billy.frontRight.motorTol=1.0;
            Billy.backRight.motorTol=1.0;
            Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
            Billy.imu.robotOnField.x = 63;//initial x position on field in inches
-           Billy.imu.robotOnField.y = -38;//initial y position on field in inches
+           Billy.imu.robotOnField.y = -36;//initial y position on field in inches
            Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST
@@ -535,11 +535,11 @@ public class OfflineOpModeLibs extends BasicAuto {
        }
 
        if(robotNumber == 4) {
-           cons.pHM.get("drivePowerLimit").setParameter(0.75);
+//           cons.pHM.get("drivePowerLimit").setParameter(0.75);
            Billy.frontLeft.motorTol=1.0;
            Billy.frontRight.motorTol=1.0;
            Billy.backRight.motorTol=1.0;
-           Billy.backLeft.motorTol=1.0;;
+           Billy.backLeft.motorTol=1.0;
            Billy.imu.robotOnField.x = 63;//initial x position on field in inches
            Billy.imu.robotOnField.y = 48;//initial y position on field in inches (WAS 48)
            Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
