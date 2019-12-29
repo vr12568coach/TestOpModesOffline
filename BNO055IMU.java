@@ -34,7 +34,9 @@ public  class BNO055IMU{
     public int gripCnt=0;
     public double blueStoneServoPos=0;
     public double redStoneServoPos =0;
-    double gripperOffset = 12;//Distance from robot rotation center in inches to gripper
+    double gripperOffsetX = 7.0 + 4.0/2.0;//Distance from robot rotation center in inches to gripper
+    double gripperInitWidth = 10.0;//gripper opening
+    double gripperOffsetY = 0.5;//Distance from robot rotation center in inches to gripper
 
     public double robotFRBLCount = 0;
     public double robotFLBRCount = 0;
@@ -113,7 +115,7 @@ public  class BNO055IMU{
             jackDirection[counter] = 0;
         }
 
-        gripperWidth[counter] = 12 +gripCnt/200;
+        gripperWidth[counter] = gripperInitWidth +gripCnt/200;
 
         //drive motor calculations
 
@@ -162,8 +164,12 @@ public  class BNO055IMU{
 
         fieldDist = Math.sqrt(robotOnField.x*robotOnField.x + robotOnField.y*robotOnField.y);
 
-        gripperX = robotOnField.x + gripperOffset *Math.cos(Math.toRadians(robotOnField.theta));
-        gripperY = robotOnField.y + gripperOffset *Math.sin(Math.toRadians(robotOnField.theta));
+//        gripperX = robotOnField.x + gripperOffset *Math.cos(Math.toRadians(robotOnField.theta));
+//        gripperY = robotOnField.y + gripperOffset *Math.sin(Math.toRadians(robotOnField.theta));
+
+        gripperX = robotOnField.x + gripperOffsetX*Math.cos(Math.toRadians(robotOnField.theta)) - gripperOffsetY*Math.sin(Math.toRadians(robotOnField.theta));
+        gripperY = robotOnField.y + gripperOffsetX*Math.sin(Math.toRadians(robotOnField.theta)) + gripperOffsetY*Math.cos(Math.toRadians(robotOnField.theta));
+
         gripperTheta = robotOnField.theta;
 
         IMUangles.firstAngle = fakeAngle;//Note IMU returns angle in opposite orientation than robot coordinate system
