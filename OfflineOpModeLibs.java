@@ -705,9 +705,9 @@ public class OfflineOpModeLibs extends BasicAuto {
 
                 grabFoundation();
 
-                pullFoundation();
+                pullFoundationAngle();
 
-                awayFromFoundation();
+//                awayFromFoundation();
 
                 telemetry.addLine("OpMode Complete");
                 telemetry.update();
@@ -729,13 +729,12 @@ public class OfflineOpModeLibs extends BasicAuto {
 
                 pullFoundation();
 
-                awayFromFoundation();
+                awayFromFoundationOneMove();
 
                 telemetry.addLine("OpMode Complete");
                 telemetry.update();
             }
             writeRF = true;
-
 
         }
 
@@ -755,8 +754,8 @@ public class OfflineOpModeLibs extends BasicAuto {
         // Prepare robot class for offline operation, must be run prior to copied runOpMode or init
         // Sets initial position and counters and initial array variables
 
-        OffLibs.location = computer.PC;//For Karl on HP
-//        OffLibs.location = computer.MAC;//For Caleb
+//        OffLibs.location = computer.PC;//For Karl on HP
+        OffLibs.location = computer.MAC;//For Caleb
 //        OffLibs.location = computer.WILL;//For William
 
 
