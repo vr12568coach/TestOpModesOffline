@@ -490,7 +490,7 @@ public class OfflineOpModeLibs extends BasicAuto {
            Billy.backRight.motorTol=1.0;
            Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
-           Billy.imu.robotOnField.x = -63;//initial x position on field in inches
+           Billy.imu.robotOnField.x = -65;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
            Billy.imu.robotOnField.y = -36;//initial y position on field in inches
            Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
@@ -507,8 +507,8 @@ public class OfflineOpModeLibs extends BasicAuto {
            Billy.backRight.motorTol=1.0;
            Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
-           Billy.imu.robotOnField.x = -63;//initial x position on field in inches
-           Billy.imu.robotOnField.y = 48;//initial y position on field in inches (WAS 48)
+           Billy.imu.robotOnField.x = -65;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
+           Billy.imu.robotOnField.y = 58;//initial y position on field in inches (WAS 48)
            Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
            Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
@@ -526,7 +526,7 @@ public class OfflineOpModeLibs extends BasicAuto {
            Billy.backRight.motorTol=1.0;
            Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
-           Billy.imu.robotOnField.x = 63;//initial x position on field in inches
+           Billy.imu.robotOnField.x = 65;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
            Billy.imu.robotOnField.y = -36;//initial y position on field in inches
            Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST
@@ -540,8 +540,8 @@ public class OfflineOpModeLibs extends BasicAuto {
            Billy.frontRight.motorTol=1.0;
            Billy.backRight.motorTol=1.0;
            Billy.backLeft.motorTol=1.0;
-           Billy.imu.robotOnField.x = 63;//initial x position on field in inches
-           Billy.imu.robotOnField.y = 48;//initial y position on field in inches (WAS 48)
+           Billy.imu.robotOnField.x = 65;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
+           Billy.imu.robotOnField.y = 58;//initial y position on field in inches (WAS 48)
            Billy.imu.robotOnField.theta = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
            Billy.imu.priorAngle = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
            Billy.imu.fakeAngle = 180;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
@@ -705,10 +705,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 
                 grabFoundation();
 
-                pullFoundation();
-
-                awayFromFoundation();
-
+                foundationInCorner();
                 telemetry.addLine("OpMode Complete");
                 telemetry.update();
 
@@ -727,10 +724,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 
                 grabFoundation();
 
-                pullFoundation();
-
-                awayFromFoundation();
-
+                foundationInCorner();
                 telemetry.addLine("OpMode Complete");
                 telemetry.update();
             }
@@ -755,8 +749,8 @@ public class OfflineOpModeLibs extends BasicAuto {
         // Prepare robot class for offline operation, must be run prior to copied runOpMode or init
         // Sets initial position and counters and initial array variables
 
-        OffLibs.location = computer.PC;//For Karl on HP
-//        OffLibs.location = computer.MAC;//For Caleb
+//        OffLibs.location = computer.PC;//For Karl on HP
+        OffLibs.location = computer.MAC;//For Caleb
 //        OffLibs.location = computer.WILL;//For William
 
 
