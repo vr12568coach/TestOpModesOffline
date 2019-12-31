@@ -749,8 +749,8 @@ public class OfflineOpModeLibs extends BasicAuto {
         // Prepare robot class for offline operation, must be run prior to copied runOpMode or init
         // Sets initial position and counters and initial array variables
 
-//        OffLibs.location = computer.PC;//For Karl on HP
-        OffLibs.location = computer.MAC;//For Caleb
+        OffLibs.location = computer.PC;//For Karl on HP
+//        OffLibs.location = computer.MAC;//For Caleb
 //        OffLibs.location = computer.WILL;//For William
 
 
