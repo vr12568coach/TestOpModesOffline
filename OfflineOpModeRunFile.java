@@ -429,6 +429,9 @@ public class OfflineOpModeRunFile extends BasicAuto {
        writeRS2 = false;
 
        switch(location) {
+           case KARL:
+               fileLocation = "/Users/karl/LocalDocuments/FTC/IntelliJ/RobotVisualization/";
+               break;
            case PC:
                fileLocation = "C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/";
                break;
@@ -556,7 +559,7 @@ public class OfflineOpModeRunFile extends BasicAuto {
    }
 
 
-   public enum computer{PC,MAC,WILL};
+   public enum computer{PC,KARL,MAC,WILL};
 
     //Run Calculations like Autonomous OpMode
     public static void main(String []args)throws IOException {
@@ -564,7 +567,8 @@ public class OfflineOpModeRunFile extends BasicAuto {
         //Instantiate a static class to run the code with
         OfflineOpModeRunFile OffRunFiles = new OfflineOpModeRunFile();
 
-        OffRunFiles.location = computer.PC;//For Karl on HP
+        OffRunFiles.location = computer.KARL;//For Karl on HP
+//        OffRunFiles.location = computer.PC;//For Karl on HP
 //        OffRunFiles.location = computer.MAC;//For Caleb
 //        OffRunFiles.location = computer.WILL;//For William
 
