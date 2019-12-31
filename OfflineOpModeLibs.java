@@ -706,6 +706,7 @@ public class OfflineOpModeLibs extends BasicAuto {
                 grabFoundation();
 
                 foundationInCorner();
+
                 telemetry.addLine("OpMode Complete");
                 telemetry.update();
 
@@ -725,11 +726,11 @@ public class OfflineOpModeLibs extends BasicAuto {
                 grabFoundation();
 
                 foundationInCorner();
+
                 telemetry.addLine("OpMode Complete");
                 telemetry.update();
             }
             writeRF = true;
-
 
         }
 
