@@ -435,6 +435,9 @@ public class OfflineOpModeLibs extends BasicAuto {
            case KARL:
                fileLocation = "/Users/karl/LocalDocuments/FTC/IntelliJ/RobotVisualization/";
                break;
+           case PC:
+               fileLocation = "C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/";
+               break;
            case MAC:
                fileLocation = "/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/";
                break;
@@ -565,7 +568,7 @@ public class OfflineOpModeLibs extends BasicAuto {
    }
 
 
-   public enum computer{KARL,MAC,WILL};
+   public enum computer{KARL,PC,MAC,WILL};
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // INSERT ACTUAL CODE TO BE TESTED IN METHODS
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
