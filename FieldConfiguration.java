@@ -32,7 +32,7 @@ public class FieldConfiguration {
     public FieldLocation blueStone2 = new FieldLocation(blueStone1.x, blueStone1.y-24, 0);
 
     //Define Red SkyStone ` initial position
-    public FieldLocation redStone1 = new FieldLocation(24, -27, 0);
+    public FieldLocation redStone1 = new FieldLocation(22.5, -27, 0);//Updated location with visualization changes to make field more square
 
     //Define Red SkyStone 2 initial position
     public FieldLocation redStone2 = new FieldLocation(redStone1.x, redStone1.y-24, 0);
@@ -52,7 +52,7 @@ public class FieldConfiguration {
         blueStone2 = new FieldLocation(blueStone1.x, blueStone1.y-24, 0);
 
         //Define Red SkyStone ` initial position
-        redStone1 = new FieldLocation(24, blueStone1.y, 0);
+        redStone1 = new FieldLocation(22.5, blueStone1.y, 0);//Updated location with visualization changes to make field more square
 
         //Define Red SkyStone 2 initial position
         redStone2 = new FieldLocation(redStone1.x, redStone1.y-24, 0);
