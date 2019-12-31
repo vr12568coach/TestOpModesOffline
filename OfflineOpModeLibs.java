@@ -432,8 +432,8 @@ public class OfflineOpModeLibs extends BasicAuto {
        writeRS2 = false;
 
        switch(location) {
-           case PC:
-               fileLocation = "C:/Users/Spiessbach/Documents/FTC/IntelliJ Projects/RobotVisualization/";
+           case KARL:
+               fileLocation = "/Users/karl/LocalDocuments/FTC/IntelliJ/RobotVisualization/";
                break;
            case MAC:
                fileLocation = "/Users/caleb/Documents/FTC/IntelliJ/RobotVisualization/";
@@ -565,7 +565,7 @@ public class OfflineOpModeLibs extends BasicAuto {
    }
 
 
-   public enum computer{PC,MAC,WILL};
+   public enum computer{KARL,MAC,WILL};
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // INSERT ACTUAL CODE TO BE TESTED IN METHODS
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -750,8 +750,8 @@ public class OfflineOpModeLibs extends BasicAuto {
         // Prepare robot class for offline operation, must be run prior to copied runOpMode or init
         // Sets initial position and counters and initial array variables
 
-//        OffLibs.location = computer.PC;//For Karl on HP
-        OffLibs.location = computer.MAC;//For Caleb
+        OffLibs.location = computer.KARL;//For Karl on HP
+//        OffLibs.location = computer.MAC;//For Caleb
 //        OffLibs.location = computer.WILL;//For William
 
 
