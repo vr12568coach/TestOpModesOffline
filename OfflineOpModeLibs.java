@@ -113,7 +113,7 @@ public class OfflineOpModeLibs extends BasicAuto {
     double[] arrayFieldDist = new double[size];
 
     double[] timeArray= new double[size];
-    public double timeStep = 150;//determined a fixed time step (in milliseconds) so that faster speeds will show shorter time to distance
+    public double timeStep = 135;//determined a fixed time step (in milliseconds) so that faster speeds will show shorter time to distance
     // relly not the time step but the speed of the motor at maxpower in counts/second
     //timeStep was 100 in seconds to fill 30 seconds / size of array = 1000 * 30/size;
     //  Measured motor speed 60 inches in 4.0 seconds @ 0.75 = 60/4.0/0.75 = 20 in/s * 360 / (3.875 * 3.14159) * 4 = 2360 counts/s
@@ -668,6 +668,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 
         if(robotNumber ==1 || robotNumber ==3){
             runtime.reset();
+            insideOutside = 0;// 0 for Inside, 24 for Outside
 
             Billy.initIMU(this);
 
@@ -703,6 +704,7 @@ public class OfflineOpModeLibs extends BasicAuto {
             }
             if(foundationPosChange != 26) {
                 runtime.reset();
+                insideOutside = 24;// 0 for Inside, 24 for Outside
 
                 Billy.initIMU(this);
 
@@ -723,6 +725,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 
             if(foundationPosChange != 26) {
                 runtime.reset();
+                insideOutside = 24;// 0 for Inside, 24 for Outside
 
                 Billy.initIMU(this);
 
@@ -754,8 +757,9 @@ public class OfflineOpModeLibs extends BasicAuto {
         // Sets initial position and counters and initial array variables
 
 
-        OffLibs.location = computer.KARL;//For Karl on HP
-//        OffLibs.location = computer.MAC;//For Caleb
+//        OffLibs.location = computer.KARL;//For Karl on Mac
+        //OffLibs.location =  PC; for the HP Windows PC
+        OffLibs.location = computer.MAC;//For Caleb
 //        OffLibs.location = computer.WILL;//For William
 
 

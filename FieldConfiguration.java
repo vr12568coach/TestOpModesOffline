@@ -21,7 +21,7 @@ public class FieldConfiguration {
 //    public ArrayList<FieldLocation> RobotPoints =new ArrayList();
 
 //    Define RedFoundation initial position
-    public FieldLocation redFound = new FieldLocation(20, 51, 0);
+    public FieldLocation redFound = new FieldLocation(15, 51, 0);
     //Define BlueFoundation initial position
     public FieldLocation blueFound = new FieldLocation(-10, 51, 0);
 
@@ -90,45 +90,51 @@ public void updateField(BasicAuto opMode) {
 
     stoneFound = seeStone(blueStone1,blueStone2,redStone1,redStone2,opMode.Billy.imu.robotOnField);
 
-    RedFoundationPoints.add(new FieldLocation(redFound.x,redFound.y,redFound.rotx,redFound.roty,redFound.theta,redFound.thetaOffset));
-    BlueFoundationPoints.add(new FieldLocation(blueFound.x,blueFound.y,blueFound.rotx,blueFound.roty,blueFound.theta,blueFound.thetaOffset));
+    RedFoundationPoints.add(new FieldLocation(redFound.x,redFound.y,redFound.theta));
+    BlueFoundationPoints.add(new FieldLocation(blueFound.x,blueFound.y,blueFound.theta));
 
-    BlueSkyStone1Points.add(new FieldLocation(blueStone1.x,blueStone1.y,blueStone1.rotx,blueStone1.roty,blueStone1.theta,blueStone1.thetaOffset));
-    BlueSkyStone2Points.add(new FieldLocation(blueStone2.x,blueStone2.y,blueStone2.rotx,blueStone2.roty,blueStone2.theta,blueStone2.thetaOffset));
+    BlueSkyStone1Points.add(new FieldLocation(blueStone1.x,blueStone1.y,blueStone1.theta));
+    BlueSkyStone2Points.add(new FieldLocation(blueStone2.x,blueStone2.y,blueStone2.theta));
 
-    RedSkyStone1Points.add(new FieldLocation(redStone1.x,redStone1.y,redStone1.rotx,redStone1.roty,redStone1.theta,redStone1.thetaOffset));
-    RedSkyStone2Points.add(new FieldLocation(redStone2.x,redStone2.y,redStone2.rotx,redStone2.roty,redStone2.theta,redStone2.thetaOffset));
+    RedSkyStone1Points.add(new FieldLocation(redStone1.x,redStone1.y,redStone1.theta));
+    RedSkyStone2Points.add(new FieldLocation(redStone2.x,redStone2.y,redStone2.theta));
 
 
     }
 
     private FieldLocation updateGameItem(FieldLocation field, FieldLocation robot){
         if (field.heldByRobot && !field.priorHold){
-            // robot just grabbed item, set rotation center to robot center and angle offset to robot angle
+            // robot just grabbed item, set field deltaX & deltaY and angle offset to robot angle
             field.deltaX = field.x - robot.x;
             field.deltaY = field.y - robot.y;
-            field.thetaOffset = robot.theta - field.theta;
+            field.thetaOffset = field.theta;
+            robot.thetaOffset = robot.theta - field.theta;
+
+            double angleRotate = robot.theta - robot.thetaOffset - field.thetaOffset;
+            field = rotationMatrix(field, robot, angleRotate);
+
         }
         else if (!field.heldByRobot && field.priorHold){
-            // robot just grabbed item, set rotation center to robot center and angle offset to robot angle
-            field.setLocation(field.x,field.y,field.theta);
-            field.setRotCenter(field.x,field.y,0);
+            // robot just released item, set field deltaX & deltaY to zero and angle offset
+            field.thetaOffset = field.theta;
             field.deltaX = 0;
             field.deltaY = 0;
         }
         else {
-//            field.setLocation((field.x + robot.x - field.rotx), (field.y + robot.y - field.roty), robot.theta);
-            field.rotx = robot.x;
-            field.roty = robot.y;
-            field.theta = robot.theta-field.thetaOffset;
-            field = rotationMatrix(field, robot);
+//            field.rotx = robot.x;
+//            field.roty = robot.y;
+            double angleRotate = robot.theta - robot.thetaOffset - field.thetaOffset;
+
+            field = rotationMatrix(field, robot, angleRotate);
+
         }
         return  field;
     }
-    private FieldLocation rotationMatrix(FieldLocation field, FieldLocation robot){
+    private FieldLocation rotationMatrix(FieldLocation field, FieldLocation robot, double angle){
         //calculate new location of point based on angle rotation and distance for rotation center
-        field.x = robot.x + field.deltaX*Math.cos(Math.toRadians(field.theta)) - field.deltaY*Math.sin(Math.toRadians(field.theta));
-        field.y = robot.y + field.deltaX*Math.sin(Math.toRadians(field.theta)) + field.deltaY*Math.cos(Math.toRadians(field.theta));
+        field.x = robot.x + field.deltaX*Math.cos(Math.toRadians(angle)) - field.deltaY*Math.sin(Math.toRadians(angle));
+        field.y = robot.y + field.deltaX*Math.sin(Math.toRadians(angle)) + field.deltaY*Math.cos(Math.toRadians(angle));
+        field.theta = field.thetaOffset + angle;
         return  field;
     }
 

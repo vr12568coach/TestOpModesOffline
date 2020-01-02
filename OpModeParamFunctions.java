@@ -490,7 +490,9 @@ public class OpModeParamFunctions {
             else {
                 //Write the opMode for foundation side
                 osw.write("\t\t" + "grabFoundation();" + "\n\n");
-                osw.write("\t\t" + "foundationInCorner();" + "\n\n");
+//                osw.write("\t\t" + "foundationInCorner();" + "\n\n");
+                osw.write("\t\t" + "grabAndRotateFoundation();" + "\n\n");
+
             }
 
             osw.write("\t\t"+"telemetry.addLine(\"OpMode Complete\");"+"\n");
