@@ -16,6 +16,8 @@ public class FieldConfiguration {
     public ArrayList<FieldLocation> RedSkyStone1Points =new ArrayList();
     public ArrayList<FieldLocation> BlueSkyStone2Points =new ArrayList();
     public ArrayList<FieldLocation> RedSkyStone2Points =new ArrayList();
+    public ArrayList<FieldLocation> PursuitPoints =new ArrayList();
+
     private int stonePosition = 1;
 //    public ArrayList<FieldLocation> GripperPoints =new ArrayList();
 //    public ArrayList<FieldLocation> RobotPoints =new ArrayList();
@@ -99,8 +101,11 @@ public void updateField(BasicAuto opMode) {
     RedSkyStone1Points.add(new FieldLocation(redStone1.x,redStone1.y,redStone1.theta));
     RedSkyStone2Points.add(new FieldLocation(redStone2.x,redStone2.y,redStone2.theta));
 
+    PursuitPoints.add(new FieldLocation(opMode.Billy.targetPoint.x,opMode.Billy.targetPoint.y,0));
 
-    }
+
+
+}
 
     private FieldLocation updateGameItem(FieldLocation field, FieldLocation robot){
         if (field.heldByRobot && !field.priorHold){

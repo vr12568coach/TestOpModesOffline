@@ -30,13 +30,8 @@
 package TestOpModesOffline;
 
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-
 import Skystone_14999.HarwareConfig.HardwareBilly;
 import Skystone_14999.OpModes.Autonomous.BasicAuto;
-import Skystone_14999.OpModes.Autonomous.DoubleSkyStoneDP_InB;
 //import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.io.DataOutputStream;
@@ -47,6 +42,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import Skystone_14999.OpModes.Autonomous.PurePursuit.PurePursuitAutoDemo;
+import Skystone_14999.OpModes.Autonomous.PurePursuit.PursuitLines;
+import Skystone_14999.OpModes.Autonomous.PurePursuit.PursuitPath;
+import Skystone_14999.OpModes.Autonomous.PurePursuit.PursuitPoint;
 
 
 /**
@@ -66,6 +65,8 @@ public class OfflineOpModeLibs extends BasicAuto {
 // DECLARE VARIABLES NEEDED FOR TEST CODE
 //****************************************
     private FieldConfiguration fc = new FieldConfiguration();
+    PurePursuitAutoDemo ppOpMode = new PurePursuitAutoDemo();
+
     boolean writeBF = false;
     boolean writeRF = false;
     boolean writeBS1 = false;
@@ -218,6 +219,8 @@ public class OfflineOpModeLibs extends BasicAuto {
 
             fc.BlueSkyStone2Points.add(fc.BlueSkyStone2Points.get(k-1));
             fc.RedSkyStone2Points.add(fc.RedSkyStone2Points.get(k-1));
+            fc.PursuitPoints.add(fc.PursuitPoints.get(k-1));
+
         }
 
     }
@@ -357,6 +360,35 @@ public class OfflineOpModeLibs extends BasicAuto {
 
     }
 
+    public void writePath(FileOutputStream fos, ArrayList<PursuitLines> lines, int size){
+
+        try {
+
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+
+//          Write the data in text format that can be read back in by the Java visualization programs in IntelliJ
+//          Only writing out the FieldLocation X,Y, Theta as formatted for reading in, Used for foundations,stones, robot, and gripper
+            osw.write("X1 (in.)"+"\t"+"Y1 (in.)"+"\t"+"X2 (in.)"+"\t"+"Y2 (in.)"+"\n"); // Header Row
+
+            for (int j = 0; j < size; j++) {
+                // writes the bytes for each double in the array
+                osw.write(Double.toString(lines.get(j).x1)+"\t"); // Path X1 position on field in inches
+                osw.write(Double.toString(lines.get(j).y1)+"\t");   // FPath Y1 position on field in inches
+                osw.write(Double.toString(lines.get(j).x2)+"\t"); // Path X2 position on field in inches
+                osw.write(Double.toString(lines.get(j).y2)+"\n");   // FPath Y2 position on field in inches
+            }
+            if(osw != null){
+                osw.flush();
+                osw.close();
+            }
+
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println(String.format("Error occurred","%S",e));
+        }
+
+    }
 
     //----------------------------------------------------------------------------------------------
     // TEST MODE CODE ONLY - UPDATES FAKE IMU
@@ -375,6 +407,7 @@ public class OfflineOpModeLibs extends BasicAuto {
         fc.updateField(this);
 
         robotSeeStone= fc.stoneFound;
+
 
         if(haveBlueFoundation){writeBF = true;}
         if(haveRedFoundation){writeRF = true;}
@@ -487,18 +520,21 @@ public class OfflineOpModeLibs extends BasicAuto {
 //       sideColor = 1;// + for Blue, - for Red
 
        if(robotNumber == 1) {
-//           cons.pHM.get("drivePowerLimit").setParameter(1.0);
+           cons.pHM.get("drivePowerLimit").setParameter(1.0);
            Billy.frontLeft.motorTol=1.0;
            Billy.frontRight.motorTol=1.0;
            Billy.backRight.motorTol=1.0;
            Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
-           Billy.imu.robotOnField.x = -65;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
-           Billy.imu.robotOnField.y = -36;//initial y position on field in inches
+           Billy.imu.robotOnField.x = -72;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
+           Billy.imu.robotOnField.y = -72;//initial y position on field in inches
            Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.robotHeading = -Billy.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
+           Billy.targetPoint.setPoint(-50,-60);
+           Billy.robotLocation.setLocation(Billy.imu.robotOnField.x ,Billy.imu.robotOnField.x ,Billy.robotHeading);
+
 
        }
 
@@ -663,43 +699,84 @@ public class OfflineOpModeLibs extends BasicAuto {
     public void runOpMode(){
 
 //        initialize();
+//        runtime.reset();
+//
+//        if(robotNumber ==1 || robotNumber ==3) {
 
-        runtime.reset();
+            if (robotNumber == 1) {
+                runtime.reset();
 
-        if(robotNumber ==1 || robotNumber ==3){
-            runtime.reset();
-            insideOutside = 0;// 0 for Inside, 24 for Outside
 
-            Billy.initIMU(this);
 
-            fwdToTwoStone();
+                Billy.robotX = Billy.imu.robotOnField.x;
+                Billy.robotY = Billy.imu.robotOnField.y;
+                Billy.robotHeading = -Billy.imu.fakeAngle;
+                Billy.robotLocation.setLocation(Billy.robotX ,Billy.robotY ,Billy.robotHeading);
+                Billy.priorAngle = Billy.robotHeading;
+                Billy.DRIVE_POWER_LIMIT = 0.7 ;
 
-            vuforiaStoneLocateOffline(stoneSelect); //REPLACES THE ACTUAL VUFORIA CODE
+//                PursuitPoint cp = new PursuitPoint(-30, -30);
+//                path.defineArc(cp, 30, -1*Math.PI, 1.5*Math.PI, 50, PursuitPath.pathDirection.NEGATIVE);
 
-            goToStone();
+                ArrayList<PursuitPoint> pathPoints = new ArrayList<>();
+                pathPoints= path.fieldPoints;
+                pathPoints.add(new PursuitPoint(-50,-60));
+                pathPoints.add(new PursuitPoint(-50,60));
+                pathPoints.add(new PursuitPoint(24,60));
+                pathPoints.add(new PursuitPoint(24,40));
+                pathPoints.add(new PursuitPoint(36,24));
+                pathPoints.add(new PursuitPoint(36,-24));
+                pathPoints.add(new PursuitPoint(24,-40));
+                pathPoints.add(new PursuitPoint(24,-60));
+                pathPoints.add(new PursuitPoint(-30,-60));
 
-            takeStone1();
+                for(int h=0;h<pathPoints.size()-1;h++) {
+                    lines.add(new PursuitLines(pathPoints.get(h).x, pathPoints.get(h).y, pathPoints.get(h+1).x, pathPoints.get(h+1).y));
+                }
 
-            getStone2();
+//                Billy.drivePursuit( path.fieldLines, this, "Drive 100 x 60 rectangle");
+//                Billy.drivePursuit(pathPoints, this, "Drive multi-lines");
+                Billy.drivePursuit(pathPoints, this, "Drive circle");
 
-            takeStone2();
 
-            twoStonePark();
 
-            telemetry.addLine("OpMode Complete");
-            telemetry.update();
-            if(robotNumber ==1) {
-                writeBS1 = true;
+
+
             }
+//
+//            if(robotNumber ==1) {
+                writeBS1 = true;
+//            }
             if(robotNumber ==3) {
+                runtime.reset();
+                insideOutside = 0;// 0 for Inside, 24 for Outside
+
+                Billy.initIMU(this);
+
+//                fwdToTwoStone();
+//
+//                vuforiaStoneLocateOffline(stoneSelect); //REPLACES THE ACTUAL VUFORIA CODE
+//
+//                goToStone();
+//
+//                takeStone1();
+//
+//                getStone2();
+//
+//                takeStone2();
+//
+//                twoStonePark();
+
+                telemetry.addLine("OpMode Complete");
+                telemetry.update();
                 writeRS1 = true;
 //                // Added if statements to write foundation files to clear old data
             }
-        }
-
-        if(robotNumber ==2){
+//        }
+//
+       if(robotNumber ==2){
             if(foundationPosChange == 26) {
-               Billy.IMUDriveFwdRight(HardwareBilly.moveDirection.RightLeft,50*sideColor, 0, "RIGHT/LEFT 50 inches",this);
+//               Billy.IMUDriveFwdRight(HardwareBilly.moveDirection.RightLeft,50*sideColor, 0, "RIGHT/LEFT 50 inches",this);
 
             }
             if(foundationPosChange != 26) {
@@ -708,9 +785,9 @@ public class OfflineOpModeLibs extends BasicAuto {
 
                 Billy.initIMU(this);
 
-                grabFoundation();
-
-                foundationInCorner();
+//                grabFoundation();
+//
+//                foundationInCorner();
 
                 telemetry.addLine("OpMode Complete");
                 telemetry.update();
@@ -720,7 +797,7 @@ public class OfflineOpModeLibs extends BasicAuto {
         }
         if(robotNumber ==4 ) {
             if(foundationPosChange == 26){
-                Billy.IMUDriveFwdRight(HardwareBilly.moveDirection.RightLeft,50*sideColor, 0, "RIGHT/LEFT 50 inches",this);
+//                Billy.IMUDriveFwdRight(HardwareBilly.moveDirection.RightLeft,50*sideColor, 0, "RIGHT/LEFT 50 inches",this);
             }
 
             if(foundationPosChange != 26) {
@@ -729,9 +806,9 @@ public class OfflineOpModeLibs extends BasicAuto {
 
                 Billy.initIMU(this);
 
-                grabFoundation();
-
-                foundationInCorner();
+//                grabFoundation();
+//
+//                foundationInCorner();
 
                 telemetry.addLine("OpMode Complete");
                 telemetry.update();
@@ -757,9 +834,9 @@ public class OfflineOpModeLibs extends BasicAuto {
         // Sets initial position and counters and initial array variables
 
 
-//        OffLibs.location = computer.KARL;//For Karl on Mac
+        OffLibs.location = computer.KARL;//For Karl on Mac
         //OffLibs.location =  PC; for the HP Windows PC
-        OffLibs.location = computer.MAC;//For Caleb
+//        OffLibs.location = computer.MAC;//For Caleb
 //        OffLibs.location = computer.WILL;//For William
 
 
@@ -793,6 +870,12 @@ public class OfflineOpModeLibs extends BasicAuto {
             fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dGripper.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
             OffLibs.fc.writeFieldAsText(fos, OffLibs.Billy.imu.GripperPoints, countVar);
 
+            if(OffLibs.robotNumber == 1) {
+                fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dPursuit.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
+                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.PursuitPoints, countVar);
+                fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dPath.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
+                OffLibs.writePath(fos, OffLibs.lines, OffLibs.lines.size());
+            }
 
             if (OffLibs.writeRF) {
                 fos = new FileOutputStream(fileLocation + "RedFoundation.txt");// Path to directory for IntelliJ code
