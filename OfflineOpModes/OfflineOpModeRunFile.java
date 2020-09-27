@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package TestOpModesOffline;
+package OfflineCode.OfflineOpModes;
 
 
 import java.io.DataOutputStream;

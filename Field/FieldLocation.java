@@ -1,4 +1,4 @@
-package TestOpModesOffline;
+package OfflineCode.Field;
 
 public class FieldLocation {
     public double x = 0;

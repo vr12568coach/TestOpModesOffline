@@ -1,4 +1,4 @@
-package TestOpModesOffline;
+package OfflineCode.OfflineOpModes;
 
 public class OpModeParam {
 

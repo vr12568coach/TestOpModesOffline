@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package TestOpModesOffline;
+package OfflineCode.OfflineOpModes;
 
 
 import Skystone_14999.HarwareConfig.HardwareBilly;
@@ -46,7 +46,8 @@ import Skystone_14999.OpModes.Autonomous.PurePursuit.PurePursuitAutoDemo;
 import Skystone_14999.OpModes.Autonomous.PurePursuit.PursuitLines;
 import Skystone_14999.OpModes.Autonomous.PurePursuit.PursuitPath;
 import Skystone_14999.OpModes.Autonomous.PurePursuit.PursuitPoint;
-
+import OfflineCode.Field.FieldConfiguration;
+import OfflineCode.Field.FieldLocation;
 
 /**
  * This is NOT an opmode.
@@ -713,7 +714,7 @@ public class OfflineOpModeLibs extends BasicAuto {
                 Billy.robotHeading = -Billy.imu.fakeAngle;
                 Billy.robotLocation.setLocation(Billy.robotX ,Billy.robotY ,Billy.robotHeading);
                 Billy.priorAngle = Billy.robotHeading;
-                Billy.DRIVE_POWER_LIMIT = 0.7 ;
+                Billy.DRIVE_POWER_LIMIT = 0.8 ;
 
 //                PursuitPoint cp = new PursuitPoint(-30, -30);
 //                path.defineArc(cp, 30, -1*Math.PI, 1.5*Math.PI, 50, PursuitPath.pathDirection.NEGATIVE);

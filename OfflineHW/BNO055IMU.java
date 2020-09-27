@@ -1,4 +1,4 @@
-package TestOpModesOffline;
+package OfflineCode.OfflineHW;
 
 
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 //import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-
+import OfflineCode.Field.FieldLocation;
 import java.util.ArrayList;
 
 import Skystone_14999.Parameters.Constants;

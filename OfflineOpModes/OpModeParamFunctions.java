@@ -1,4 +1,4 @@
-package TestOpModesOffline;
+package OfflineCode.OfflineOpModes;
 
 import android.content.Context;
 import android.util.Log;
@@ -18,7 +18,7 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 
 import Skystone_14999.OpModes.Autonomous.BasicAuto;
-import TestOpModesOffline.OpModeParam;
+import OfflineCode.OfflineOpModes.OpModeParam;
 import Skystone_14999.OpModes.BasicOpMode;
 
 public class OpModeParamFunctions {

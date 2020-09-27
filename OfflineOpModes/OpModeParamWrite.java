@@ -1,4 +1,4 @@
-package TestOpModesOffline;
+package OfflineCode.OfflineOpModes;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

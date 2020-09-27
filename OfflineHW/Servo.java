@@ -1,4 +1,4 @@
-package TestOpModesOffline;
+package OfflineCode.OfflineHW;
 
 /**
  * Created by Spiessbach on 8/26/2018.
