@@ -527,13 +527,13 @@ public class OfflineOpModeLibs extends BasicAuto {
            Billy.backRight.motorTol=1.0;
            Billy.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
-           Billy.imu.robotOnField.x = -72;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
-           Billy.imu.robotOnField.y = -72;//initial y position on field in inches
+           Billy.imu.robotOnField.x = -62;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
+           Billy.imu.robotOnField.y = -62;//initial y position on field in inches
            Billy.imu.robotOnField.theta = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.priorAngle = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
            Billy.robotHeading = -Billy.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
-           Billy.targetPoint.setPoint(-50,-60);
+           Billy.targetPoint.setPoint(-50,-50);
            Billy.robotLocation.setLocation(Billy.imu.robotOnField.x ,Billy.imu.robotOnField.x ,Billy.robotHeading);
 
 
@@ -714,22 +714,38 @@ public class OfflineOpModeLibs extends BasicAuto {
                 Billy.robotHeading = -Billy.imu.fakeAngle;
                 Billy.robotLocation.setLocation(Billy.robotX ,Billy.robotY ,Billy.robotHeading);
                 Billy.priorAngle = Billy.robotHeading;
-                Billy.DRIVE_POWER_LIMIT = 0.8 ;
+                Billy.DRIVE_POWER_LIMIT = 0.75;
+                Billy.STEERING_POWER_LIMIT = Billy.DRIVE_POWER_LIMIT *0.65;//somewhere between 0.60 and 0.72
+                Billy.STEERING_POWER_GAIN = 0.1;
 
 //                PursuitPoint cp = new PursuitPoint(-30, -30);
 //                path.defineArc(cp, 30, -1*Math.PI, 1.5*Math.PI, 50, PursuitPath.pathDirection.NEGATIVE);
 
                 ArrayList<PursuitPoint> pathPoints = new ArrayList<>();
                 pathPoints= path.fieldPoints;
-                pathPoints.add(new PursuitPoint(-50,-60));
-                pathPoints.add(new PursuitPoint(-50,60));
-                pathPoints.add(new PursuitPoint(24,60));
-                pathPoints.add(new PursuitPoint(24,40));
-                pathPoints.add(new PursuitPoint(36,24));
-                pathPoints.add(new PursuitPoint(36,-24));
-                pathPoints.add(new PursuitPoint(24,-40));
-                pathPoints.add(new PursuitPoint(24,-60));
-                pathPoints.add(new PursuitPoint(-30,-60));
+                pathPoints.add(new PursuitPoint(-48,-48));
+//                pathPoints.add(new PursuitPoint(-50,60));
+//                pathPoints.add(new PursuitPoint(24,60));
+//                pathPoints.add(new PursuitPoint(24,40));
+//                pathPoints.add(new PursuitPoint(36,24));
+//                pathPoints.add(new PursuitPoint(36,-24));
+//                pathPoints.add(new PursuitPoint(24,-40));
+//                pathPoints.add(new PursuitPoint(24,-60));
+//                pathPoints.add(new PursuitPoint(-30,-60));
+            // New set of points for different motion
+                pathPoints.add(new PursuitPoint(-48,-12));
+                pathPoints.add(new PursuitPoint(-12,0));
+                pathPoints.add(new PursuitPoint(-12,24));
+                pathPoints.add(new PursuitPoint(-45,48));
+                pathPoints.add(new PursuitPoint(-55,40));
+                pathPoints.add(new PursuitPoint(-60,0));
+                pathPoints.add(new PursuitPoint(-70,-48));
+                pathPoints.add(new PursuitPoint(-60,-70));
+                pathPoints.add(new PursuitPoint(0,-70));
+                pathPoints.add(new PursuitPoint(60,0));
+                pathPoints.add(new PursuitPoint(60,60));
+                pathPoints.add(new PursuitPoint(-60,60));
+
 
                 for(int h=0;h<pathPoints.size()-1;h++) {
                     lines.add(new PursuitLines(pathPoints.get(h).x, pathPoints.get(h).y, pathPoints.get(h+1).x, pathPoints.get(h+1).y));
