@@ -6,13 +6,11 @@ import com.qualcomm.robotcore.util.Range;
 
 /**
  * Created by Spiessbach on 8/26/2018.
+ * Removed commented code 10/4/2020
  */
 
 public class DcMotor {
-//    final double ROBOT_INCH_TO_MOTOR_DEG = 360 / (3.875 * Math.PI);// 360 deg. / wheel circumference (Wheel diameter x pi)
-//    final int DEGREES_TO_COUNTS = 1440 / 360; //Counts per 1 revolution
-//    double driveDistance = 24;//Target distance inches for robot motion in any omni direction for drive motors
-//    int maxCounts = (int) Math.round(driveDistance*ROBOT_INCH_TO_MOTOR_DEG*DEGREES_TO_COUNTS);
+
     public double timeStep = 0.0;//determined a fixed time step so that faster speeds will show shorter time to distance
     public int fakePosition=0;
     public int targetPosition=0;
@@ -22,10 +20,7 @@ public class DcMotor {
     public String targetMode = "No";
     public Boolean busyStatus = false;
     public void setPower(double power){
-//        int deltaPosition;
         this.motorPower = Range.clip(power,-1,1);
-//        deltaPosition = (int) Math.round(power*timeStep);
-//        fakePosition += deltaPosition;
         this.targetMode = "No";
     }
 
@@ -33,16 +28,7 @@ public class DcMotor {
 
         return this.motorPower;
     }
-//    public boolean isBusy(){
-//
-//        return this.busyStatus;
-//    }
-//    public void setPowerFloat(){
-//
-//    };
-//    public DcMotorController getController(){
-//        return this.FakeController;
-//    };
+
     public int getCurrentPosition(){
         if(this.targetMode == "Yes"){
             int deltaPosition;

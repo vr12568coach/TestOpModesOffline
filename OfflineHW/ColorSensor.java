@@ -1,10 +1,10 @@
 package OfflineCode.OfflineHW;
 
-import android.graphics.Color;
-//import android.support.annotation.ColorInt;
+
 
 /**
  * Created by Spiessbach on 8/26/2018.
+ * Removed android reference in order to compile 10/4/2020
  */
 
 public class ColorSensor {
@@ -23,7 +23,7 @@ public class ColorSensor {
         hueArray[size-1] = 20.0f;
 
     }
-//    @ColorInt
+
     public static int red(int color) {
         return (color >> 16) & 0xFF;
     }
@@ -32,7 +32,6 @@ public class ColorSensor {
      * Return the green component of a color int. This is the same as saying
      * (color >> 8) & 0xFF
      */
-//    @ColorInt
     public static int green(int color) {
         return (color >> 8) & 0xFF;
     }
@@ -41,41 +40,11 @@ public class ColorSensor {
      * Return the blue component of a color int. This is the same as saying
      * color & 0xFF
      */
-//    @ColorInt
+
     public static int blue(int color) {
         return color & 0xFF;
     }
 
-//    public double red(){
-//        double colorValue;
-////        counter += 1;
-////        double colVal= (Math.random())*255;
-////        colorValue = (int) Math.round(colVal);
-////        if(counter > 10){
-//            colorValue = 124/256;
-////        }
-//        return colorValue;
-//    }
-//    public double green(){
-//        double colorValue;
-////        counter += 1;
-////        double colVal= (Math.random())*255;
-////        colorValue = (int) Math.round(colVal);
-////        if(counter > 10){
-//            colorValue = 100/256;
-////        }
-//        return colorValue;
-//    }
-//    public double blue(){
-//        double colorValue;
-////        counter += 1;
-////        double colVal= (Math.random())*255;
-////        colorValue = (int) Math.round(colVal);
-////        if(counter > 10){
-//            colorValue = 0/256;
-////        }
-//        return colorValue;
-//    }
 
     public float[] generateHSV(){
        //HSV array[0] Hue needs to be between 15 and 30 to exit the sampling
@@ -94,12 +63,7 @@ public class ColorSensor {
         double doubleHSV[] = {0,0,0};
         double ColorArray[] = {0,0,0};
         for(int i=0; i<30;i ++) {
-//            Color.RGBToHSV((int) (CS.red() * 255),
-//                    (int) (CS.green() * 255),
-//                    (int) (CS.blue() * 255),
-//                    testHSV);
-//            Color.RGBToHSV((int) CS.red(YELLOW), (int)CS.green(YELLOW),(int)CS.blue(YELLOW), testHSV);
-//            Color.HSVToColor(testHSV);
+
             testHSV = CS.generateHSV();
             for (int j = 0; j < 3; j++) {
 //                testHSV[j] = (float) (Math.random())*255;
@@ -109,7 +73,6 @@ public class ColorSensor {
             ColorArray[1] = CS.blue(YELLOW);
             ColorArray[2] = CS.green(YELLOW);
 
-//            Color.RGBToHSV(intColor[0], intColor[1], intColor[2], testHSV);
 
             System.out.println(String.format("Fake HSV Output-- H: %.2f, S: %.2f, V: %.2f", doubleHSV[0], doubleHSV[1], doubleHSV[2]));
             System.out.println(String.format("Color Methods-- R: %.3f, B: %.3f, G: %.3f", ColorArray[0], ColorArray[1], ColorArray[2]));
