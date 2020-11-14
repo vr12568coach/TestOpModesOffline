@@ -12,10 +12,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 //import org.firstinspires.ftc.robotcore.external.navigation.TempUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-import OfflineCode.Field.FieldLocation;
+import UltimateGoal_RobotTeam.Utilities.FieldLocation;
 import java.util.ArrayList;
 
-import Skystone_14999.Parameters.Constants;
+import UltimateGoal_RobotTeam.Parameters.Constants;
 
 /**
  * Created by Spiessbach on 8/26/2018.

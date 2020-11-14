@@ -1,13 +1,17 @@
 package OfflineCode.Field;
 
-import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
-import Skystone_14999.OpModes.Autonomous.BasicAuto;
-import Skystone_14999.OpModes.BasicOpMode;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.BasicAuto;
+import UltimateGoal_RobotTeam.Utilities.FieldLocation;
+
+/** CLASS IS USED TO SET SKYSTONE FIELD
+ * ADAPT FOR ULTIMATE GOAL FOR WOBBLE GOAL & RINGS - CLASS OBJECT IS "the field"
+ * COMMENTED OUT PORTION OF CODE FOR VARIABLES NOT IN OPMODE
+ */
 
 public class FieldConfiguration {
     public ArrayList<FieldLocation> RedFoundationPoints =new ArrayList();
@@ -17,6 +21,8 @@ public class FieldConfiguration {
     public ArrayList<FieldLocation> BlueSkyStone2Points =new ArrayList();
     public ArrayList<FieldLocation> RedSkyStone2Points =new ArrayList();
     public ArrayList<FieldLocation> PursuitPoints =new ArrayList();
+    public ArrayList<FieldLocation> NavPoints1 =new ArrayList();
+    public ArrayList<FieldLocation> NavPoints2 =new ArrayList();
 
     private int stonePosition = 1;
 //    public ArrayList<FieldLocation> GripperPoints =new ArrayList();
@@ -72,25 +78,25 @@ public void updateField(BasicAuto opMode) {
     redStone2.setHold(opMode.haveRedSkyStone2);
 
     if(redFound.heldByRobot){
-        redFound = updateGameItem(redFound,opMode.Billy.imu.robotOnField);
+        redFound = updateGameItem(redFound,opMode.robotUG.driveTrain.imu.robotOnField);
     }
     if(blueFound.heldByRobot){
-        blueFound = updateGameItem(blueFound,opMode.Billy.imu.robotOnField);
+        blueFound = updateGameItem(blueFound,opMode.robotUG.driveTrain.imu.robotOnField);
     }
     if(blueStone1.heldByRobot){
-        blueStone1 = updateGameItem(blueStone1,opMode.Billy.imu.robotOnField);
+        blueStone1 = updateGameItem(blueStone1,opMode.robotUG.driveTrain.imu.robotOnField);
     }
     if(blueStone2.heldByRobot){
-        blueStone2 = updateGameItem(blueStone2,opMode.Billy.imu.robotOnField);
+        blueStone2 = updateGameItem(blueStone2,opMode.robotUG.driveTrain.imu.robotOnField);
     }
     if(redStone1.heldByRobot){
-        redStone1 = updateGameItem(redStone1,opMode.Billy.imu.robotOnField);
+        redStone1 = updateGameItem(redStone1,opMode.robotUG.driveTrain.imu.robotOnField);
     }
     if(redStone2.heldByRobot){
-        redStone2 = updateGameItem(redStone2,opMode.Billy.imu.robotOnField);
+        redStone2 = updateGameItem(redStone2,opMode.robotUG.driveTrain.imu.robotOnField);
     }
 
-    stoneFound = seeStone(blueStone1,blueStone2,redStone1,redStone2,opMode.Billy.imu.robotOnField);
+    stoneFound = seeStone(blueStone1,blueStone2,redStone1,redStone2,opMode.robotUG.driveTrain.imu.robotOnField);
 
     RedFoundationPoints.add(new FieldLocation(redFound.x,redFound.y,redFound.theta));
     BlueFoundationPoints.add(new FieldLocation(blueFound.x,blueFound.y,blueFound.theta));
@@ -101,7 +107,9 @@ public void updateField(BasicAuto opMode) {
     RedSkyStone1Points.add(new FieldLocation(redStone1.x,redStone1.y,redStone1.theta));
     RedSkyStone2Points.add(new FieldLocation(redStone2.x,redStone2.y,redStone2.theta));
 
-    PursuitPoints.add(new FieldLocation(opMode.Billy.targetPoint.x,opMode.Billy.targetPoint.y,0));
+    PursuitPoints.add(new FieldLocation(opMode.robotUG.driveTrain.targetPoint.x,opMode.robotUG.driveTrain.targetPoint.y,0));
+    NavPoints1.add(new FieldLocation(opMode.robotUG.driveTrain.robotFieldLocationNav1.x,opMode.robotUG.driveTrain.robotFieldLocationNav1.y,0));
+    NavPoints2.add(new FieldLocation(opMode.robotUG.driveTrain.robotFieldLocationNav2.x,opMode.robotUG.driveTrain.robotFieldLocationNav2.y,0));
 
 
 

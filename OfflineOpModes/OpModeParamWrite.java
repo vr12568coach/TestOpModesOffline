@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 
 
-import Skystone_14999.OpModes.BasicOpMode;
+import UltimateGoal_RobotTeam.OpModes.BasicOpMode;
 
 
 public class OpModeParamWrite extends BasicOpMode {
