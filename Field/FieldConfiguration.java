@@ -21,8 +21,7 @@ public class FieldConfiguration {
     public ArrayList<FieldLocation> BlueSkyStone2Points =new ArrayList();
     public ArrayList<FieldLocation> RedSkyStone2Points =new ArrayList();
     public ArrayList<FieldLocation> PursuitPoints =new ArrayList();
-    public ArrayList<FieldLocation> NavPoints1 =new ArrayList();
-    public ArrayList<FieldLocation> NavPoints2 =new ArrayList();
+    public ArrayList<FieldLocation> NavPoints =new ArrayList();
 
     private int stonePosition = 1;
 //    public ArrayList<FieldLocation> GripperPoints =new ArrayList();
@@ -108,10 +107,7 @@ public void updateField(BasicAuto opMode) {
     RedSkyStone2Points.add(new FieldLocation(redStone2.x,redStone2.y,redStone2.theta));
 
     PursuitPoints.add(new FieldLocation(opMode.robotUG.driveTrain.targetPoint.x,opMode.robotUG.driveTrain.targetPoint.y,0));
-    NavPoints1.add(new FieldLocation(opMode.robotUG.driveTrain.robotFieldLocationNav1.x,opMode.robotUG.driveTrain.robotFieldLocationNav1.y,0));
-    NavPoints2.add(new FieldLocation(opMode.robotUG.driveTrain.robotFieldLocationNav2.x,opMode.robotUG.driveTrain.robotFieldLocationNav2.y,0));
-
-
+    NavPoints.add(new FieldLocation(opMode.robotUG.driveTrain.robotFieldLocation.x,opMode.robotUG.driveTrain.robotFieldLocation.y,0));
 
 }
 

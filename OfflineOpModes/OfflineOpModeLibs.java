@@ -30,7 +30,6 @@
 package OfflineCode.OfflineOpModes;
 
 
-import UltimateGoal_RobotTeam.HarwareConfig.DriveTrain;
 import UltimateGoal_RobotTeam.HarwareConfig.HardwareRobotMulti;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.BasicAuto;
 //import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -45,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.PurePursuit.PurePursuitAutoDemo;
 import UltimateGoal_RobotTeam.Utilities.PursuitLines;
+import UltimateGoal_RobotTeam.Utilities.PursuitPath;
 import UltimateGoal_RobotTeam.Utilities.PursuitPoint;
 import OfflineCode.Field.FieldConfiguration;
 import UltimateGoal_RobotTeam.Utilities.FieldLocation;
@@ -198,8 +198,7 @@ public class OfflineOpModeLibs extends BasicAuto {
             fc.BlueSkyStone2Points.add(fc.BlueSkyStone2Points.get(k-1));
             fc.RedSkyStone2Points.add(fc.RedSkyStone2Points.get(k-1));
             fc.PursuitPoints.add(fc.PursuitPoints.get(k-1));
-            fc.NavPoints1.add(fc.NavPoints1.get(k-1));
-            fc.NavPoints2.add(fc.NavPoints2.get(k-1));
+            fc.NavPoints.add(fc.NavPoints.get(k-1));
 
         }
 
@@ -525,12 +524,7 @@ public class OfflineOpModeLibs extends BasicAuto {
            robotUG.driveTrain.imu.fakeAngle = 0;//initial robot angle orientation on field in degrees from EAST
            robotUG.driveTrain.robotHeading = -robotUG.driveTrain.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
 
-
-//           robotUG.driveTrain.robotLocationNav1 = robotUG.driveTrain.imu.robotOnField;
-           robotUG.driveTrain.robotLocationNav2 = robotUG.driveTrain.imu.robotOnField;
-
-           robotUG.driveTrain.robotFieldLocationNav2 = robotUG.driveTrain.imu.robotOnField;
-//           robotUG.driveTrain.robotFieldLocationNav1 = robotUG.driveTrain.imu.robotOnField;
+           robotUG.driveTrain.robotFieldLocation = robotUG.driveTrain.imu.robotOnField;
 
            robotUG.driveTrain.targetPoint.setPoint(robotUG.driveTrain.imu.robotOnField.x ,robotUG.driveTrain.imu.robotOnField.y);
 
@@ -637,48 +631,60 @@ public class OfflineOpModeLibs extends BasicAuto {
 
 
                 // for tests and smaller field trials the robot is initialized to (0,0) and 0.0 degrees
-//                robotUG.driveTrain.robotLocationNav1 = robotUG.driveTrain.imu.robotOnField;
-                robotUG.driveTrain.robotLocationNav2 = robotUG.driveTrain.imu.robotOnField;
-//                robotUG.driveTrain.robotFieldLocationNav1 = robotUG.driveTrain.imu.robotOnField;
-                robotUG.driveTrain.robotFieldLocationNav2 = robotUG.driveTrain.imu.robotOnField;
+                robotUG.driveTrain.robotFieldLocation = robotUG.driveTrain.imu.robotOnField;
+                robotUG.driveTrain.robotX = robotUG.driveTrain.imu.robotOnField.x;
+                robotUG.driveTrain.robotY = robotUG.driveTrain.imu.robotOnField.y;
+
 
                 robotUG.driveTrain.robotHeading = -robotUG.driveTrain.imu.fakeAngle;
-                robotUG.driveTrain.priorAngle = robotUG.driveTrain.robotHeading;
-                cons.DRIVE_POWER_LIMIT = 0.05;
-                cons.STEERING_POWER_LIMIT = cons.DRIVE_POWER_LIMIT*0.70;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
-                cons.STEERING_POWER_GAIN = 0.05;//was 0.05
+                robotUG.driveTrain.robotAngle = robotUG.driveTrain.robotHeading ;
 
-//                ArrayList<PursuitPoint> pathPoints = new ArrayList<>();
-//                pathPoints= fieldPoints;
+                robotUG.driveTrain.priorAngle = robotUG.driveTrain.robotHeading;
+                cons.DRIVE_POWER_LIMIT = 0.7;
+                cons.STEERING_POWER_LIMIT = 0.7;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
+                cons.STEERING_POWER_GAIN = 0.03;//was 0.05
+
+                ArrayList<PursuitPoint> pathPoints = new ArrayList<>();
+                pathPoints= fieldPoints;
 //
-//                pathPoints.add(new PursuitPoint(robotUG.driveTrain.robotLocationNav2.x  ,robotUG.driveTrain.robotLocationNav2.y));
-                // Simple set of points - diamond
-//                pathPoints.add(new PursuitPoint(30,30));
+                pathPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y));
+                // Simple set of points - diamond or square
+//                pathPoints.add(new PursuitPoint(60,0));
+//                pathPoints.add(new PursuitPoint(60,60));
 //                pathPoints.add(new PursuitPoint(0,60));
-//                pathPoints.add(new PursuitPoint(-30,30));
-//                pathPoints.add(new PursuitPoint(-6,6));
+//                pathPoints.add(new PursuitPoint(0,12));
 
                 // Slalom course - doesn't get to 180 so should be good
-//                pathPoints.add(new PursuitPoint(18,0));
-//                pathPoints.add(new PursuitPoint(18,72));
-//                pathPoints.add(new PursuitPoint(36,72));
-//                pathPoints.add(new PursuitPoint(36,0));
-//                pathPoints.add(new PursuitPoint(54, 0));
-//                pathPoints.add(new PursuitPoint(54,72));
-//                pathPoints.add(new PursuitPoint(72,72));
-//                pathPoints.add(new PursuitPoint(72,0));
+//                pathPoints.add(new PursuitPoint(12,0));
+//                pathPoints.add(new PursuitPoint(12,60));
+//                pathPoints.add(new PursuitPoint(24,60));
+//                pathPoints.add(new PursuitPoint(24,0));
+//                pathPoints.add(new PursuitPoint(36, 0));
+//                pathPoints.add(new PursuitPoint(36,60));
+//                pathPoints.add(new PursuitPoint(48,60));
+//                pathPoints.add(new PursuitPoint(48,0));
+//                pathPoints.add(new PursuitPoint(60, 0));
+//                pathPoints.add(new PursuitPoint(60,60));
+
 
                 // angled line
-//                pathPoints.add(new PursuitPoint(30,30));
-//                pathPoints.add(new PursuitPoint(45,35));
-//                pathPoints.add(new PursuitPoint(60,70));
+//                pathPoints.add(new PursuitPoint(24,0));
+//                pathPoints.add(new PursuitPoint(36,12));
+//                pathPoints.add(new PursuitPoint(48,48));
+//                pathPoints.add(new PursuitPoint(54,68));
+//
+                // Circle
+                pathPoints.add(new PursuitPoint(34,10.0));
+                ArrayList<PursuitPoint> circlePoints;
+                circlePoints = PursuitPath.defineArc(new PursuitPoint(12,12), 24.0, 0.0, 330*Math.PI/180,  25, PursuitPath.pathDirection.POSITIVE);
+                pathPoints.addAll(circlePoints);
+                ArrayList<PursuitPoint> rectPoints;
+                rectPoints = PursuitPath.defineRectangle(36, 0, 24, -60, 10);
+                pathPoints.addAll(rectPoints);
 
-
-
-
-//                for(int h=0;h<pathPoints.size()-1;h++) {
-//                    lines.add(new PursuitLines(pathPoints.get(h).x, pathPoints.get(h).y, pathPoints.get(h+1).x, pathPoints.get(h+1).y));
-//                }
+                for(int h=0;h<pathPoints.size()-1;h++) {
+                    lines.add(new PursuitLines(pathPoints.get(h).x, pathPoints.get(h).y, pathPoints.get(h+1).x, pathPoints.get(h+1).y));
+                }
                 telemetry.addData("Drive Power Limit Updated", cons.DRIVE_POWER_LIMIT);
                 telemetry.addData("Steering Power Limit Updated", cons.STEERING_POWER_LIMIT);
                 telemetry.addData("Steering Power Gain Updated", cons.STEERING_POWER_GAIN);
@@ -686,16 +692,20 @@ public class OfflineOpModeLibs extends BasicAuto {
                 telemetry.addData("Right Scale Factor", cons.adjRight);
                 telemetry.addData("Rotation Scale Factor", cons.adjRotate);
 
-//                robotUG.driveTrain.drivePursuit(pathPoints, this, "Drive multi-lines");
+                robotUG.driveTrain.drivePursuit(pathPoints, this, "Drive multi-lines");
 
                 //Drive set distances and report Navigation
-                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,6,0,"FWD 60",this);
-                robotUG.driveTrain.IMUDriveRotate(-90,"CCW 90",this);
-                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,6,-90,"FWD 60",this);
-                robotUG.driveTrain.IMUDriveRotate(-180,"CCW 90",this);
-                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,12,-180,"FWD 120",this);
-                robotUG.driveTrain.IMUDriveRotate(-270,"CCW 90",this);
-                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,12,-270,"FWD 120",this);
+//                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,60,0,"FWD 60",this);
+//                robotUG.driveTrain.IMUDriveRotate(-90,"CCW 90",this);
+//                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,60,-90,"FWD 60",this);
+//                robotUG.driveTrain.IMUDriveRotate(-180,"CCW 90",this);
+//                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,120,-180,"FWD 120",this);
+//                robotUG.driveTrain.IMUDriveRotate(-270,"CCW 90",this);
+//                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,120,-270,"FWD 120",this);
+//                robotUG.driveTrain.IMUDriveRotate(-360,"CCW 90",this);
+//                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,120,-360,"FWD 120",this);
+//                robotUG.driveTrain.IMUDriveRotate(-90,"CW 270",this);
+//                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,120,-90,"FWD 120",this);
 
 
             }
@@ -829,10 +839,8 @@ public class OfflineOpModeLibs extends BasicAuto {
             if(OffLibs.robotNumber == 1) {
                 fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dPursuit.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
                 OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.PursuitPoints, countVar);
-                fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dNav1.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
-                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.NavPoints1, countVar);
-                fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dNav2.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
-                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.NavPoints2, countVar);
+                fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dNav.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
+                OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.NavPoints, countVar);
                 fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dPath.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
                 OffLibs.writePath(fos, OffLibs.lines, OffLibs.lines.size());
             }

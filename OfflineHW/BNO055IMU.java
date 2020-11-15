@@ -120,8 +120,13 @@ public  class BNO055IMU{
         //drive motor calculations
 
         int deltaSum = (deltaFL  + deltaFR  + deltaBR  + deltaBL)/4;
-        fakeAngle += (float) deltaSum / (params.DEGREES_TO_COUNTS * params.ROBOT_INCH_TO_MOTOR_DEG *
+        fakeAngle += (float) deltaSum / (params.DEGREES_TO_COUNTS_40_1 * params.ROBOT_INCH_TO_MOTOR_DEG *
                 params.ROBOT_DEG_TO_WHEEL_INCH * params.adjRotate);
+        if (fakeAngle > 180) {//This is IF/THEN for the wrap routine
+            fakeAngle -= 360;//Decrease angle for negative direction //rotation
+        } else if (fakeAngle < -180) {
+            fakeAngle += 360;//increase angle for positive direction //rotation 
+        }
         // no change to delta sum to put angle into field coordinates, + sum = CCW --> + IMU angle
         float fake1 = (float) (fakeAngle - priorAngle);
         float fake2 = (float) timeStep;
@@ -145,9 +150,9 @@ public  class BNO055IMU{
 //adding +=
 //Coordinate transformation to take motor drive coordinates to robot body reference frame - fixed 45 deg rotation
         double robotXInc = factor* ((robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
-                (params.DEGREES_TO_COUNTS*params.ROBOT_INCH_TO_MOTOR_DEG);
+                (params.DEGREES_TO_COUNTS_40_1 *params.ROBOT_INCH_TO_MOTOR_DEG);
         double robotYInc = -factor* ((-robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
-                (params.DEGREES_TO_COUNTS*params.ROBOT_INCH_TO_MOTOR_DEG);
+                (params.DEGREES_TO_COUNTS_40_1 *params.ROBOT_INCH_TO_MOTOR_DEG);
         robotX += robotXInc;
         robotY += robotYInc;
         robotDist = Math.sqrt(robotX*robotX + robotY*robotY);
