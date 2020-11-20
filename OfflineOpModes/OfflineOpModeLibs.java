@@ -641,7 +641,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 
                 robotUG.driveTrain.priorAngle = robotUG.driveTrain.robotHeading;
                 cons.DRIVE_POWER_LIMIT = 0.7;
-                cons.STEERING_POWER_LIMIT = 0.7;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
+                cons.STEERING_POWER_LIMIT = 0.6;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
                 cons.STEERING_POWER_GAIN = 0.03;//was 0.05
 
                 ArrayList<PursuitPoint> pathPoints = new ArrayList<>();
@@ -655,16 +655,16 @@ public class OfflineOpModeLibs extends BasicAuto {
 //                pathPoints.add(new PursuitPoint(0,12));
 
                 // Slalom course - doesn't get to 180 so should be good
-//                pathPoints.add(new PursuitPoint(12,0));
-//                pathPoints.add(new PursuitPoint(12,60));
-//                pathPoints.add(new PursuitPoint(24,60));
-//                pathPoints.add(new PursuitPoint(24,0));
-//                pathPoints.add(new PursuitPoint(36, 0));
-//                pathPoints.add(new PursuitPoint(36,60));
-//                pathPoints.add(new PursuitPoint(48,60));
-//                pathPoints.add(new PursuitPoint(48,0));
-//                pathPoints.add(new PursuitPoint(60, 0));
-//                pathPoints.add(new PursuitPoint(60,60));
+                pathPoints.add(new PursuitPoint(12,0));
+                pathPoints.add(new PursuitPoint(12,60));
+                pathPoints.add(new PursuitPoint(24,60));
+                pathPoints.add(new PursuitPoint(24,0));
+                pathPoints.add(new PursuitPoint(36, 0));
+                pathPoints.add(new PursuitPoint(36,60));
+                pathPoints.add(new PursuitPoint(48,60));
+                pathPoints.add(new PursuitPoint(48,0));
+                pathPoints.add(new PursuitPoint(60, 0));
+                pathPoints.add(new PursuitPoint(60,60));
 
 
                 // angled line
@@ -674,13 +674,13 @@ public class OfflineOpModeLibs extends BasicAuto {
 //                pathPoints.add(new PursuitPoint(54,68));
 //
                 // Circle
-                pathPoints.add(new PursuitPoint(34,10.0));
-                ArrayList<PursuitPoint> circlePoints;
-                circlePoints = PursuitPath.defineArc(new PursuitPoint(12,12), 24.0, 0.0, 330*Math.PI/180,  25, PursuitPath.pathDirection.POSITIVE);
-                pathPoints.addAll(circlePoints);
-                ArrayList<PursuitPoint> rectPoints;
-                rectPoints = PursuitPath.defineRectangle(36, 0, 24, -60, 10);
-                pathPoints.addAll(rectPoints);
+//                pathPoints.add(new PursuitPoint(34,10.0));
+//                ArrayList<PursuitPoint> circlePoints;
+//                circlePoints = PursuitPath.defineArc(new PursuitPoint(12,12), 24.0, 0.0, 330*Math.PI/180,  25, PursuitPath.pathDirection.POSITIVE);
+//                pathPoints.addAll(circlePoints);
+//                ArrayList<PursuitPoint> rectPoints;
+//                rectPoints = PursuitPath.defineRectangle(36, 0, 24, -60, 10);
+//                pathPoints.addAll(rectPoints);
 
                 for(int h=0;h<pathPoints.size()-1;h++) {
                     lines.add(new PursuitLines(pathPoints.get(h).x, pathPoints.get(h).y, pathPoints.get(h+1).x, pathPoints.get(h+1).y));
