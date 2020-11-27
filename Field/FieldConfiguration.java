@@ -14,97 +14,118 @@ import UltimateGoal_RobotTeam.Utilities.FieldLocation;
  */
 
 public class FieldConfiguration {
-    public ArrayList<FieldLocation> RedFoundationPoints =new ArrayList();
-    public ArrayList<FieldLocation> BlueFoundationPoints =new ArrayList();
-    public ArrayList<FieldLocation> BlueSkyStone1Points =new ArrayList();
-    public ArrayList<FieldLocation> RedSkyStone1Points =new ArrayList();
-    public ArrayList<FieldLocation> BlueSkyStone2Points =new ArrayList();
-    public ArrayList<FieldLocation> RedSkyStone2Points =new ArrayList();
+    public ArrayList<FieldLocation> RedRingPoints =new ArrayList();
+    public ArrayList<FieldLocation> BlueRingPoints =new ArrayList();
+    public ArrayList<FieldLocation> RedRingStackPoints =new ArrayList();
+    public ArrayList<FieldLocation> BlueRingStackPoints =new ArrayList();
+    public ArrayList<FieldLocation> BlueWobble1Points =new ArrayList();
+    public ArrayList<FieldLocation> RedWobble1Points =new ArrayList();
+    public ArrayList<FieldLocation> BlueWobble2Points =new ArrayList();
+    public ArrayList<FieldLocation> RedWobble2Points =new ArrayList();
     public ArrayList<FieldLocation> PursuitPoints =new ArrayList();
     public ArrayList<FieldLocation> NavPoints =new ArrayList();
 
-    private int stonePosition = 1;
+    private String ringType = "ring";
 //    public ArrayList<FieldLocation> GripperPoints =new ArrayList();
 //    public ArrayList<FieldLocation> RobotPoints =new ArrayList();
 
-//    Define RedFoundation initial position
-    public FieldLocation redFound = new FieldLocation(15, 51, 0);
-    //Define BlueFoundation initial position
-    public FieldLocation blueFound = new FieldLocation(-10, 51, 0);
+//    Define Red Single Ring initial position - default for sim is on field
+    public FieldLocation redRing = new FieldLocation(36, -23, 0);
+    //Define Blue Ring Stack initial position - default for sim is on field
+    public FieldLocation blueRing = new FieldLocation(-36, -23, 0);
 
-    //Define Blue SkyStone 1 initial position
-    public FieldLocation blueStone1 = new FieldLocation(-20, -27, 0);
+    //    Define Red Ring Stack initial position - default for sim is off field
+    public FieldLocation redRingStack = new FieldLocation(100, -100, 0);
+    //Define Blue Ring Stack initial position - default for sim is off field
+    public FieldLocation blueRingStack = new FieldLocation(-100, -100, 0);
 
-    //Define Blue SkyStone 2 initial position
-    public FieldLocation blueStone2 = new FieldLocation(blueStone1.x, blueStone1.y-24, 0);
+    //Define Blue Wobble Goal 1 initial position
+    public FieldLocation blueWobble1 = new FieldLocation(-26, -48, 0);
 
-    //Define Red SkyStone ` initial position
-    public FieldLocation redStone1 = new FieldLocation(22.5, -27, 0);//Updated location with visualization changes to make field more square
+    //Define Blue Wobble Goal 2 initial position
+    public FieldLocation blueWobble2 = new FieldLocation(-50, -48, 0);
 
-    //Define Red SkyStone 2 initial position
-    public FieldLocation redStone2 = new FieldLocation(redStone1.x, redStone1.y-24, 0);
+    //Define Red Wobble Goal ` initial position
+    public FieldLocation redWobble1 = new FieldLocation(26, -48, 0);
 
-    public boolean stoneFound = false;
+    //Define Red Wobble Goal 2 initial position
+    public FieldLocation redWobble2 = new FieldLocation(50, -48, 0);
+
+    public boolean ringFound = false;
 
     public FieldConfiguration(){
         // Blank constructor
     }
-    public FieldConfiguration(int stonePos){
-        // constructor to set stone locations in 0, 1, 2
-        stonePosition = stonePos;
-        //Define Blue SkyStone 1 initial position
-        blueStone1 = new FieldLocation(-20, -27-stonePos*8, 0);
+    public FieldConfiguration(int ringSet){
+        // constructor to set ring type in 0, 1, 4
 
-        //Define Blue SkyStone 2 initial position
-        blueStone2 = new FieldLocation(blueStone1.x, blueStone1.y-24, 0);
+        //    Define Ring Configurations position based on ringSet input 0 = none on field, 1 = single
 
-        //Define Red SkyStone ` initial position
-        redStone1 = new FieldLocation(22.5, blueStone1.y, 0);//Updated location with visualization changes to make field more square
+        // Would it be simpler to pass a variable that defines what image to use in the Viz code vs. track 2 items?
+        if(ringSet ==0) {
+            ringType = "none";
+            //Define Red Single Ring initial position - off field
+            redRing = new FieldLocation(100, -100, 0);
+            //Define Blue Ring Stack initial position - off field
+            blueRing = new FieldLocation(-100, -100, 0);
 
-        //Define Red SkyStone 2 initial position
-        redStone2 = new FieldLocation(redStone1.x, redStone1.y-24, 0);
-
+        }
+        else {
+            //Define Red Single Ring initial position
+            redRing = new FieldLocation(36, -23, 0);
+            //Define Blue Ring Stack initial position
+            blueRing = new FieldLocation(-36, -23, 0);
+            if(ringSet ==1) {
+                ringType = "ring";
+            }
+            else {
+                ringType = "ringStack";
+            }
+        }
     }
 
 public void updateField(BasicAuto opMode) {
-            //FoundationOpMode and Stone calculations
+            //Wobble Goal and Ring calculations
 
-    redFound.setHold(opMode.haveRedFoundation);
-    blueFound.setHold(opMode.haveBlueFoundation);
-    blueStone1.setHold(opMode.haveBlueSkyStone1);
-    blueStone2.setHold(opMode.haveBlueSkyStone2);
-    redStone1.setHold(opMode.haveRedSkyStone1);
-    redStone2.setHold(opMode.haveRedSkyStone2);
+    redRing.setHold(opMode.haveRedRing);
+    blueRing.setHold(opMode.haveBlueRing);
+    // Is having the rings held necessary?
+    // Does the ring stack need to be added?
 
-    if(redFound.heldByRobot){
-        redFound = updateGameItem(redFound,opMode.robotUG.driveTrain.imu.robotOnField);
+    blueWobble1.setHold(opMode.haveBlueWobble1);
+    blueWobble2.setHold(opMode.haveBlueWobble2);
+    redWobble1.setHold(opMode.haveRedWobble1);
+    redWobble2.setHold(opMode.haveRedWobble2);
+
+    if(redRing.heldByRobot){
+        redRing = updateGameItem(redRing,opMode.robotUG.driveTrain.imu.robotOnField);
     }
-    if(blueFound.heldByRobot){
-        blueFound = updateGameItem(blueFound,opMode.robotUG.driveTrain.imu.robotOnField);
+    if(blueRing.heldByRobot){
+        blueRing = updateGameItem(blueRing,opMode.robotUG.driveTrain.imu.robotOnField);
     }
-    if(blueStone1.heldByRobot){
-        blueStone1 = updateGameItem(blueStone1,opMode.robotUG.driveTrain.imu.robotOnField);
+    if(blueWobble1.heldByRobot){
+        blueWobble1 = updateGameItem(blueWobble1,opMode.robotUG.driveTrain.imu.robotOnField);
     }
-    if(blueStone2.heldByRobot){
-        blueStone2 = updateGameItem(blueStone2,opMode.robotUG.driveTrain.imu.robotOnField);
+    if(blueWobble2.heldByRobot){
+        blueWobble2 = updateGameItem(blueWobble2,opMode.robotUG.driveTrain.imu.robotOnField);
     }
-    if(redStone1.heldByRobot){
-        redStone1 = updateGameItem(redStone1,opMode.robotUG.driveTrain.imu.robotOnField);
+    if(redWobble1.heldByRobot){
+        redWobble1 = updateGameItem(redWobble1,opMode.robotUG.driveTrain.imu.robotOnField);
     }
-    if(redStone2.heldByRobot){
-        redStone2 = updateGameItem(redStone2,opMode.robotUG.driveTrain.imu.robotOnField);
+    if(redWobble2.heldByRobot){
+        redWobble2 = updateGameItem(redWobble2,opMode.robotUG.driveTrain.imu.robotOnField);
     }
 
-    stoneFound = seeStone(blueStone1,blueStone2,redStone1,redStone2,opMode.robotUG.driveTrain.imu.robotOnField);
+    ringFound = seeRing(blueRing, blueRingStack, redRing, redRingStack,opMode.robotUG.driveTrain.imu.robotOnField);
 
-    RedFoundationPoints.add(new FieldLocation(redFound.x,redFound.y,redFound.theta));
-    BlueFoundationPoints.add(new FieldLocation(blueFound.x,blueFound.y,blueFound.theta));
+    RedRingPoints.add(new FieldLocation(redRing.x, redRing.y, redRing.theta));
+    BlueRingPoints.add(new FieldLocation(blueRing.x,blueRing.y,blueRing.theta));
 
-    BlueSkyStone1Points.add(new FieldLocation(blueStone1.x,blueStone1.y,blueStone1.theta));
-    BlueSkyStone2Points.add(new FieldLocation(blueStone2.x,blueStone2.y,blueStone2.theta));
+    BlueWobble1Points.add(new FieldLocation(blueWobble1.x, blueWobble1.y, blueWobble1.theta));
+    BlueWobble2Points.add(new FieldLocation(blueWobble2.x, blueWobble2.y, blueWobble2.theta));
 
-    RedSkyStone1Points.add(new FieldLocation(redStone1.x,redStone1.y,redStone1.theta));
-    RedSkyStone2Points.add(new FieldLocation(redStone2.x,redStone2.y,redStone2.theta));
+    RedWobble1Points.add(new FieldLocation(redWobble1.x, redWobble1.y, redWobble1.theta));
+    RedWobble2Points.add(new FieldLocation(redWobble2.x, redWobble2.y, redWobble2.theta));
 
     PursuitPoints.add(new FieldLocation(opMode.robotUG.driveTrain.targetPoint.x,opMode.robotUG.driveTrain.targetPoint.y,0));
     NavPoints.add(new FieldLocation(opMode.robotUG.driveTrain.robotFieldLocation.x,opMode.robotUG.driveTrain.robotFieldLocation.y,0));
@@ -175,22 +196,46 @@ public void updateField(BasicAuto opMode) {
         }
 
     }
+    public void writeRingType(FileOutputStream fos){
 
-    private boolean seeStone(FieldLocation b1,FieldLocation b2,FieldLocation r1,FieldLocation r2, FieldLocation robot) {
-        boolean stoneInView = false;
+        try {
+
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+
+//          Write the data in text format that can be read back in by the Java visualization programs in IntelliJ
+//          Only writing out a string to indicate "ring or "ringStack"
+            osw.write(ringType); //string for ring type
+            if(osw != null){
+                osw.flush();
+                osw.close();
+            }
+
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println(String.format("Error occurred","%S",e));
+        }
+
+    }
+    private boolean seeRing(FieldLocation b1, FieldLocation b2, FieldLocation r1, FieldLocation r2, FieldLocation robot) {
+        boolean ringInView = false;
+        // Should update the checks to include that the robot is facing the rings
+        // atan2(ringY-botY,ringX-botX) within +/- 10 deg{?} of IMU angle
+        //Math.hypot(ringY-botY,ringX-botX) < 15" {?} distance to camera is close enough
         if((Math.abs(b1.y - robot.y) < 4) && (Math.abs(b1.x - robot.x) < 20)){
-            stoneInView = true;
+            ringInView = true;
         }
         else if((Math.abs(b2.y - robot.y) < 4) && (Math.abs(b2.x - robot.x) < 20)){
-            stoneInView = true;
+            ringInView = true;
         }
         else if((Math.abs(r1.y - robot.y) < 4) && (Math.abs(r1.x - robot.x) < 20)){
-            stoneInView = true;
+            ringInView = true;
         }
         else if((Math.abs(r2.y - robot.y) < 4) && (Math.abs(r2.x - robot.x) < 20)){
-            stoneInView = true;
+            ringInView = true;
         }
-        else{stoneInView = false;}
-        return stoneInView;
+        else{ringInView = false;}
+        //should this return an int[] that indicates which item is in view in case it could be multiple?
+        return ringInView;
     }
 }
