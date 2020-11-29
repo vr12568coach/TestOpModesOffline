@@ -16,8 +16,6 @@ import UltimateGoal_RobotTeam.Utilities.FieldLocation;
 public class FieldConfiguration {
     public ArrayList<FieldLocation> RedRingPoints =new ArrayList();
     public ArrayList<FieldLocation> BlueRingPoints =new ArrayList();
-    public ArrayList<FieldLocation> RedRingStackPoints =new ArrayList();
-    public ArrayList<FieldLocation> BlueRingStackPoints =new ArrayList();
     public ArrayList<FieldLocation> BlueWobble1Points =new ArrayList();
     public ArrayList<FieldLocation> RedWobble1Points =new ArrayList();
     public ArrayList<FieldLocation> BlueWobble2Points =new ArrayList();

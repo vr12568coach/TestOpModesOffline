@@ -547,6 +547,10 @@ public class OfflineOpModeLibs extends BasicAuto {
            robotUG.driveTrain.imu.priorAngle = robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
            robotUG.driveTrain.imu.fakeAngle = (float) robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
            robotUG.driveTrain.robotHeading = -robotUG.driveTrain.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
+
+           robotUG.driveTrain.robotFieldLocation = robotUG.driveTrain.imu.robotOnField;
+
+
            telemetry.addData("Robot Number ", "%d",robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.DRIVE_POWER_LIMIT);
 
@@ -566,6 +570,9 @@ public class OfflineOpModeLibs extends BasicAuto {
            robotUG.driveTrain.imu.priorAngle = robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST
            robotUG.driveTrain.imu.fakeAngle = (float) robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST
            robotUG.driveTrain.robotHeading = -robotUG.driveTrain.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
+
+           robotUG.driveTrain.robotFieldLocation = robotUG.driveTrain.imu.robotOnField;
+
            telemetry.addData("Robot Number ", "%d",robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.DRIVE_POWER_LIMIT);
 
@@ -585,6 +592,9 @@ public class OfflineOpModeLibs extends BasicAuto {
            robotUG.driveTrain.imu.priorAngle = robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
            robotUG.driveTrain.imu.fakeAngle = (float) robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST (WAS 0 for backing to foundation)
            robotUG.driveTrain.robotHeading = -robotUG.driveTrain.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
+
+           robotUG.driveTrain.robotFieldLocation = robotUG.driveTrain.imu.robotOnField;
+
            telemetry.addData("Robot Number ", "%d",robotNumber);
            telemetry.addData("drivePowerLimit ", "%.2f",cons.DRIVE_POWER_LIMIT);
 
@@ -628,18 +638,12 @@ public class OfflineOpModeLibs extends BasicAuto {
 //
 //        if(robotNumber ==1 || robotNumber ==3) {
 
-            if (robotNumber == 1) {
+        if (robotNumber ==1) {
                 runtime.reset();
-
-
-                // for tests and smaller field trials the robot is initialized to (0,0) and 0.0 degrees
-//                robotUG.driveTrain.initIMUtoAngle(this,-90.0); // NEEDS TO BE IN ACTUAL OpMode
-                cons.DRIVE_POWER_LIMIT = 0.4;
+                 cons.DRIVE_POWER_LIMIT = 0.4;
                 cons.STEERING_POWER_LIMIT = 0.4;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
                 cons.STEERING_POWER_GAIN = 0.05;//was 0.05
 
-//                pathPoints= fieldPoints;
-//
                 fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y));
                 // Simple set of points - diamond or square
 //                fieldPoints.add(new PursuitPoint(-30,-30));
@@ -678,7 +682,6 @@ public class OfflineOpModeLibs extends BasicAuto {
 //                rectPoints = PursuitPath.defineRectangle(36, 0, 24, -60, 10);
 //                fieldPoints.addAll(rectPoints);
 
-                int size1 = fieldPoints.size();
                 for(int h=0;h<fieldPoints.size()-1;h++) {
                     lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
                 }
@@ -693,14 +696,22 @@ public class OfflineOpModeLibs extends BasicAuto {
 
 
                 robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
-            // angled line
-//                fieldPoints.add(new PursuitPoint(-48,12));
-//                fieldPoints.add(new PursuitPoint(-24,-12));
-//                fieldPoints.add(new PursuitPoint(-20,-6));
-//
-//                for(int h=size1;h<fieldPoints.size()-1;h++) {
-//                    lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
-//                }
+
+                haveBlueWobble1 = false;
+
+                fieldPoints.clear();
+                fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x,robotUG.driveTrain.robotFieldLocation.y));
+
+            // move to shooter line
+                fieldPoints.add(new PursuitPoint(-48,12));
+                fieldPoints.add(new PursuitPoint(-24,-12));
+                fieldPoints.add(new PursuitPoint(-20,-6));
+
+                for(int h=0;h<fieldPoints.size()-1;h++) {
+                    lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
+                }
+            robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
+
 
                 //Drive set distances and report Navigation
 //                robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack,60,0,"FWD 60",this);
@@ -717,78 +728,121 @@ public class OfflineOpModeLibs extends BasicAuto {
 
 
             }
+        if(robotNumber ==2){
+            runtime.reset();
+
+
+//            cons.DRIVE_POWER_LIMIT = 0.4;
+//            cons.STEERING_POWER_LIMIT = 0.4;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
+//            cons.STEERING_POWER_GAIN = 0.05;//was 0.05
 //
-//            if(robotNumber ==1) {
-                writeBW1 = true;
+//            fieldPoints.clear();
+//            lines.clear();
+//            fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y));
+
+            // Simple set of points - diamond or square
+//
+//            fieldPoints.add(new PursuitPoint(-36,-36));
+//            fieldPoints.add(new PursuitPoint(-36,-24));
+//            fieldPoints.add(new PursuitPoint(-40,-24));
+//            fieldPoints.add(new PursuitPoint(-40,-12));
+//            fieldPoints.add(new PursuitPoint(-60,-12));
+//            fieldPoints.add(new PursuitPoint(-60,24));
+//
+//            for(int h=0;h<fieldPoints.size()-1;h++) {
+//                lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
 //            }
-            if(robotNumber ==3) {
-                runtime.reset();
-                insideOutside = 0;// 0 for Inside, 24 for Outside
-
-                robotUG.driveTrain.initIMU(this);
-
-//                fwdToTwoStone();
 //
-//                vuforiaStoneLocateOffline(stoneSelect); //REPLACES THE ACTUAL VUFORIA CODE
-//
-//                goToStone();
-//
-//                takeStone1();
-//
-//                getStone2();
-//
-//                takeStone2();
-//
-//                twoStonePark();
+//            telemetry.addData("Drive Power Limit Updated", cons.DRIVE_POWER_LIMIT);
+//            telemetry.addData("Steering Power Limit Updated", cons.STEERING_POWER_LIMIT);
+//            telemetry.addData("Steering Power Gain Updated", cons.STEERING_POWER_GAIN);
+//            telemetry.addData("Forward Scale Factor", cons.adjForward);
+//            telemetry.addData("Right Scale Factor", cons.adjRight);
+//            telemetry.addData("Rotation Scale Factor", cons.adjRotate);
 
-                telemetry.addLine("OpMode Complete");
-                telemetry.update();
-                writeRW1 = true;
-//                // Added if statements to write foundation files to clear old data
-            }
-//        }
-//
-       if(robotNumber ==2){
-            if(foundationPosChange == 26) {
-//               robotUG.driveTrain.IMUDriveFwdRight(HardwarerobotUG.driveTrain.moveDirection.RightLeft,50*sideColor, 0, "RIGHT/LEFT 50 inches",this);
+//            haveBlueWobble2 = true;
+//            haveBlueRing = true;
 
-            }
-            if(foundationPosChange != 26) {
-                runtime.reset();
-                insideOutside = 24;// 0 for Inside, 24 for Outside
+//            robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
 
-                robotUG.driveTrain.initIMU(this);
-
-//                grabFoundation();
-//
-//                foundationInCorner();
-
-                telemetry.addLine("OpMode Complete");
-                telemetry.update();
-
-            }
+//            haveBlueWobble2 = false;
             writeBR = true;
+            writeBW2 = true;
         }
-        if(robotNumber ==4 ) {
-            if(foundationPosChange == 26){
-//                robotUG.driveTrain.IMUDriveFwdRight(HardwarerobotUG.driveTrain.moveDirection.RightLeft,50*sideColor, 0, "RIGHT/LEFT 50 inches",this);
-            }
-
-            if(foundationPosChange != 26) {
+        if(robotNumber ==3) {
                 runtime.reset();
-                insideOutside = 24;// 0 for Inside, 24 for Outside
+//                cons.DRIVE_POWER_LIMIT = 0.4;
+                cons.STEERING_POWER_LIMIT = 0.4;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
+                cons.STEERING_POWER_GAIN = 0.05;//was 0.05
 
-                robotUG.driveTrain.initIMU(this);
+                fieldPoints.clear();
+                lines.clear();
+                fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y));
+                // angled line
+                fieldPoints.add(new PursuitPoint(24,-36));
+                fieldPoints.add(new PursuitPoint(24,-24));
+                fieldPoints.add(new PursuitPoint(30,-24));
+                fieldPoints.add(new PursuitPoint(30,-12));
+                fieldPoints.add(new PursuitPoint(60,-12));
+                fieldPoints.add(new PursuitPoint(60,12));
 
-//                grabFoundation();
-//
-//                foundationInCorner();
 
-                telemetry.addLine("OpMode Complete");
-                telemetry.update();
+                for(int h=0;h<fieldPoints.size()-1;h++) {
+                    lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
+                }
+                haveRedWobble1 = true;
+                robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
+
+                telemetry.addData("Drive Power Limit Updated", cons.DRIVE_POWER_LIMIT);
+                telemetry.addData("Steering Power Limit Updated", cons.STEERING_POWER_LIMIT);
+                telemetry.addData("Steering Power Gain Updated", cons.STEERING_POWER_GAIN);
+                telemetry.addData("Forward Scale Factor", cons.adjForward);
+                telemetry.addData("Right Scale Factor", cons.adjRight);
+                telemetry.addData("Rotation Scale Factor", cons.adjRotate);
+
+                writeRR = true;
+                writeRW1 = true;
             }
-            writeRR = true;
+        if(robotNumber ==4 ) {
+            runtime.reset();
 
+            // for tests and smaller field trials the robot is initialized to (0,0) and 0.0 degrees
+//                robotUG.driveTrain.initIMUtoAngle(this,-90.0); // NEEDS TO BE IN ACTUAL OpMode
+//            cons.DRIVE_POWER_LIMIT = 0.4;
+//            cons.STEERING_POWER_LIMIT = 0.4;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
+//            cons.STEERING_POWER_GAIN = 0.05;//was 0.05
+
+
+//            fieldPoints.clear();
+//            lines.clear();
+//            fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y));
+
+            // Simple set of points - diamond or square
+
+//            fieldPoints.add(new PursuitPoint(36,-36));
+//            fieldPoints.add(new PursuitPoint(36,-24));
+//            fieldPoints.add(new PursuitPoint(40,-24));
+//            fieldPoints.add(new PursuitPoint(40,-12));
+//            fieldPoints.add(new PursuitPoint(60,-12));
+//            fieldPoints.add(new PursuitPoint(60,24));
+
+//            for(int h=0;h<fieldPoints.size()-1;h++) {
+//                lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
+//            }
+//
+//            telemetry.addData("Drive Power Limit Updated", cons.DRIVE_POWER_LIMIT);
+//            telemetry.addData("Steering Power Limit Updated", cons.STEERING_POWER_LIMIT);
+//            telemetry.addData("Steering Power Gain Updated", cons.STEERING_POWER_GAIN);
+//            telemetry.addData("Forward Scale Factor", cons.adjForward);
+//            telemetry.addData("Right Scale Factor", cons.adjRight);
+//            telemetry.addData("Rotation Scale Factor", cons.adjRotate);
+//
+//            haveRedWobble2 = true;
+//
+//            robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
+//
+//            haveRedWobble2 = false;
+            writeRW2 = true;
         }
 
     } //MAIN OpMode PROGRAM END
@@ -844,13 +898,15 @@ public class OfflineOpModeLibs extends BasicAuto {
             fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dGripper.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
             OffLibs.fc.writeFieldAsText(fos, OffLibs.robotUG.driveTrain.imu.GripperPoints, countVar);
 
+            fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dPath.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
+            OffLibs.writePath(fos, OffLibs.lines, OffLibs.lines.size());
+
             if(OffLibs.robotNumber == 1) {
                 fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dPursuit.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
                 OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.PursuitPoints, countVar);
                 fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dNav.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
                 OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.NavPoints, countVar);
-                fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dPath.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
-                OffLibs.writePath(fos, OffLibs.lines, OffLibs.lines.size());
+
             }
 
             if (OffLibs.writeRR) {
@@ -866,17 +922,19 @@ public class OfflineOpModeLibs extends BasicAuto {
                 fos = new FileOutputStream(fileLocation + "RingSet.txt");// Path to directory for IntelliJ code
                 OffLibs.fc.writeRingType(fos);
             }
-            if (OffLibs.writeRW1 || OffLibs.writeRW2) {
+            if (OffLibs.writeRW1) {
                 fos = new FileOutputStream(fileLocation + "RedWobble1.txt");// Path to directory for IntelliJ code
                 OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.RedWobble1Points, countVar);
-
+            }
+            if (OffLibs.writeRW2){
                 fos = new FileOutputStream(fileLocation + "RedWobble2.txt");// Path to directory for IntelliJ code
                 OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.RedWobble2Points, countVar);
             }
-            if (OffLibs.writeBW1 || OffLibs.writeBW2) {
+            if (OffLibs.writeBW1 ) {
                 fos = new FileOutputStream(fileLocation + "BlueWobble1.txt");// Path to directory for IntelliJ code
                 OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.BlueWobble1Points, countVar);
-
+            }
+            if ( OffLibs.writeBW2){
                 fos = new FileOutputStream(fileLocation + "BlueWobble2.txt");// Path to directory for IntelliJ code
                 OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.BlueWobble2Points, countVar);
             }
