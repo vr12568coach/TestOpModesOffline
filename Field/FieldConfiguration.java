@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
+import OfflineCode.OfflineHW.DcMotor;
+import UltimateGoal_RobotTeam.HarwareConfig.WobbleArm;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.BasicAuto;
 import UltimateGoal_RobotTeam.Utilities.FieldLocation;
 
@@ -102,16 +104,16 @@ public void updateField(BasicAuto opMode) {
         blueRing = updateGameItem(blueRing,opMode.robotUG.driveTrain.imu.robotOnField);
     }
     if(blueWobble1.heldByRobot){
-        blueWobble1 = updateGameItem(blueWobble1,opMode.robotUG.driveTrain.imu.robotOnField);
+        blueWobble1 = updateWobbleGoal(blueWobble1,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm);
     }
     if(blueWobble2.heldByRobot){
-        blueWobble2 = updateGameItem(blueWobble2,opMode.robotUG.driveTrain.imu.robotOnField);
+        blueWobble2 = updateWobbleGoal(blueWobble2,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm);
     }
     if(redWobble1.heldByRobot){
-        redWobble1 = updateGameItem(redWobble1,opMode.robotUG.driveTrain.imu.robotOnField);
+        redWobble1 = updateWobbleGoal(redWobble1,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm);
     }
     if(redWobble2.heldByRobot){
-        redWobble2 = updateGameItem(redWobble2,opMode.robotUG.driveTrain.imu.robotOnField);
+        redWobble2 = updateWobbleGoal(redWobble2,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm);
     }
 
     ringFound = seeRing(blueRing, blueRingStack, redRing, redRingStack,opMode.robotUG.driveTrain.imu.robotOnField);
@@ -157,6 +159,35 @@ public void updateField(BasicAuto opMode) {
 
         }
         return  field;
+    }
+    private FieldLocation updateWobbleGoal(FieldLocation wobble, FieldLocation robot, WobbleArm wga){
+        if (wobble.heldByRobot && !wobble.priorHold){
+            // robot just grabbed item, set field deltaX & deltaY and angle offset to robot angle
+            // use the WGA motor to determine the position for the gripper
+            wobble.deltaY = wga.ARM_Y + (Math.cos((wga.getArmAngleDegrees()+wga.ARM_INIT_ANGLE_DEG)*Math.PI/180.0) * wga.ARM_LENGTH);
+            wobble.deltaX = wga.ARM_X;
+            wobble.thetaOffset = wobble.theta;
+            robot.thetaOffset = robot.theta - wobble.theta;
+
+            double angleRotate = robot.theta - robot.thetaOffset - wobble.thetaOffset;
+            wobble = rotationMatrix(wobble, robot, angleRotate);
+
+        }
+        else if (!wobble.heldByRobot && wobble.priorHold){
+            // robot just released item, set field deltaX & deltaY to zero and angle offset
+            wobble.thetaOffset = wobble.theta;
+            wobble.deltaX = 0;
+            wobble.deltaY = 0;
+        }
+        else {
+            //update position while held
+            wobble.deltaY = wga.ARM_Y + (Math.cos((wga.getArmAngleDegrees()+wga.ARM_INIT_ANGLE_DEG)*Math.PI/180.0) * wga.ARM_LENGTH);
+            wobble.deltaX = wga.ARM_X;
+            double angleRotate = robot.theta - robot.thetaOffset - wobble.thetaOffset;
+            wobble = rotationMatrix(wobble, robot, angleRotate);
+
+        }
+        return  wobble;
     }
     private FieldLocation rotationMatrix(FieldLocation field, FieldLocation robot, double angle){
         //calculate new location of point based on angle rotation and distance for rotation center

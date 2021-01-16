@@ -19,6 +19,7 @@ public class DcMotor {
     public double motorTol = 1;// tolerance value for instances of the motor for their speed
     public String targetMode = "No";
     public Boolean busyStatus = false;
+
     public void setPower(double power){
         this.motorPower = Range.clip(power,-1,1);
         this.targetMode = "No";
@@ -41,12 +42,14 @@ public class DcMotor {
                 if(this.powerSign >= 0){
                     this.fakePosition = Range.clip(this.fakePosition,this.fakePosition,this.targetPosition);
                 }
+                busyStatus = true;
             }
         }
         else {
             int deltaPosition;
             deltaPosition = (int) Math.round(this.motorPower*this.timeStep * this.motorTol);
             this.fakePosition += deltaPosition;
+            busyStatus = false;
         }
         return this.fakePosition;
     }
@@ -63,6 +66,7 @@ public class DcMotor {
             }
             deltaPosition = (int) Math.round(this.powerSign*this.motorPower * this.timeStep* this.motorTol);
             this.fakePosition += deltaPosition;
+            busyStatus = true;
         }
     }
     public int getTargetPosition() {
@@ -93,7 +97,11 @@ public class DcMotor {
 
     public void setDirection(DcMotorSimple.Direction Dir){
 
-    };
+    }
 
+    public boolean isBusy(){
+        int temp = getCurrentPosition();
+        return busyStatus;
+    }
 
 }

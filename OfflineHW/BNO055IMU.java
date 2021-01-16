@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 //import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -30,13 +31,10 @@ public  class BNO055IMU{
     public int frCnt=0;
     public int brCnt=0;
     public int blCnt=0;
-    public int jackCnt =0;
-    public int gripCnt=0;
+    public int wgaCnt =0;
     public double blueStoneServoPos=0;
     public double redStoneServoPos =0;
-    double gripperOffsetX = 7.0 + 4.0/2.0;//Distance from robot rotation center in inches to gripper
-    double gripperInitWidth = 10.0;//gripper opening
-    double gripperOffsetY = 0.5;//Distance from robot rotation center in inches to gripper
+
 
     public double robotFRBLCount = 0;
     public double robotFLBRCount = 0;
@@ -49,10 +47,6 @@ public  class BNO055IMU{
     public double fieldDist=0;
 
     public FieldLocation robotOnField = new FieldLocation(0,0,0);
-
-    public double gripperX = 0;
-    public double gripperY = 0;
-    public double gripperTheta = 0;
 
 
     public Orientation IMUangles = new Orientation(AxesReference.INTRINSIC, AxesOrder.ZYX, org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES, 100, 100, 100, 1);
@@ -67,10 +61,6 @@ public  class BNO055IMU{
     public int[] frArray=new int[size];
     public int[] brArray=new int[size];
     public int[] blArray=new int[size];
-    public int[] jackArray =new int[size];
-    public double[] blueServoArray =new double[size];
-    public double[] redServoArray =new double[size];
-
 
     public double[] FLBRArray=new double[size];
     public double[] FRBLArray=new double[size];
@@ -80,15 +70,9 @@ public  class BNO055IMU{
     public double[] robotDistArray=new double[size];
     public double[] robotAngleArray=new double[size];
 
-//    public double[] fieldXArray=new double[size];
-//    public double[] fieldYArray=new double[size];
     public double[] fieldDistArray=new double[size];
 
-    public ArrayList<FieldLocation> GripperPoints =new ArrayList();
     public ArrayList<FieldLocation> RobotPoints =new ArrayList();
-
-    public int[] jackDirection =new int[size];
-    public double[] gripperWidth =new double[size];
 
 
     public int counter = 0;
@@ -102,20 +86,7 @@ public  class BNO055IMU{
         int deltaFR = frCnt - frArray[counter-1];
         int deltaBR = brCnt - brArray[counter-1];
         int deltaBL = blCnt - blArray[counter-1];
-        int deltaJack = jackCnt - jackArray[counter-1];
 
-        //jack and gripper calculations
-        if (deltaJack > 0){
-            jackDirection[counter] = 1;
-        }
-        else if(deltaJack < 0){
-            jackDirection[counter] = -1;
-        }
-        else {
-            jackDirection[counter] = 0;
-        }
-
-        gripperWidth[counter] = gripperInitWidth +gripCnt/200;
 
         //drive motor calculations
 
@@ -169,13 +140,6 @@ public  class BNO055IMU{
 
         fieldDist = Math.sqrt(robotOnField.x*robotOnField.x + robotOnField.y*robotOnField.y);
 
-//        gripperX = robotOnField.x + gripperOffset *Math.cos(Math.toRadians(robotOnField.theta));
-//        gripperY = robotOnField.y + gripperOffset *Math.sin(Math.toRadians(robotOnField.theta));
-
-        gripperX = robotOnField.x + gripperOffsetX*Math.cos(Math.toRadians(robotOnField.theta)) - gripperOffsetY*Math.sin(Math.toRadians(robotOnField.theta));
-        gripperY = robotOnField.y + gripperOffsetX*Math.sin(Math.toRadians(robotOnField.theta)) + gripperOffsetY*Math.cos(Math.toRadians(robotOnField.theta));
-
-        gripperTheta = robotOnField.theta;
 
         IMUangles.firstAngle = fakeAngle;//Note IMU returns angle in opposite orientation than robot coordinate system
         //IMU + angle = CCW ; robot + angle = CW
@@ -184,28 +148,22 @@ public  class BNO055IMU{
 
         timeValue+=timeStep;
         timeArray[counter] = timeValue/1000;
+
         flArray[counter] = flCnt;
         frArray[counter] = frCnt;
         brArray[counter] = brCnt;
         blArray[counter] = blCnt;
-        jackArray[counter] = jackCnt;
-
-        blueServoArray[counter] = blueStoneServoPos;
-        redServoArray[counter] = redStoneServoPos;
 
         FLBRArray[counter] = robotFLBRCount;
         FRBLArray[counter] = robotFRBLCount;
+
         robotXArray[counter] = robotX;
         robotYArray[counter] = robotY;
         robotDistArray[counter] = robotDist;
         robotAngleArray[counter] =  IMUangles.firstAngle;//use IMU + = CCW convention for visualization
-//        fieldXArray[counter] = fieldX;
-//        fieldYArray[counter] = fieldY;
+
         fieldDistArray[counter] = fieldDist;
-//        RedFoundationPoints.add(new FieldLocation(redFoundX,redFoundY,redFoundTheta));
-//        BlueFoundationPoints.add(new FieldLocation(blueFoundX,blueFoundY,blueFoundTheta));
-//        SkyStonePoints.add(new FieldLocation(stoneX,stoneY,stoneTheta));
-        GripperPoints.add(new FieldLocation(gripperX,gripperY,gripperTheta));
+
         RobotPoints.add(new FieldLocation(robotOnField.x,robotOnField.y,robotOnField.theta));
 
         counter+=1;
