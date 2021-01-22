@@ -31,6 +31,8 @@ IMPORTANT - follow the instructions below in order to use this code
 3. Clone that repository to another code directory
     The directory should be outside the "UltimateGoalOffline" project but it can be in any file location
     Note: You will need the file location for updating the OfflineOpModeLibs file for the path to write files
+    Note: Select the V3_in_work branch in GitHub desktop and update the repository
+
 4. Download IntelliJ IDEA or other code development package for Java that is not targeted for Android phones
     You need this package to open and run the RobotVisualization Code
 5. Open the "RobotVisualization" project in IntelliJ
