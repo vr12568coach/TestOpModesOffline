@@ -51,4 +51,7 @@ public class Telemetry {
         return TMData;
     }
 
+    public void setAutoClear(boolean val) {
+
+    }
 }

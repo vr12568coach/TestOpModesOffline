@@ -81,6 +81,13 @@ public  class BNO055IMU{
     public static final I2cAddr I2CADDR_DEFAULT     = I2cAddr.create7bit(0x28);
 
 
+    /** getAngularOrientation: every time this method is called in the Offline code updateIMU() method must be run in the OpMode
+     * This method only tracks the robot and not the field items, pursuit points or navigation points
+     * @param reference
+     * @param order
+     * @param angleUnit
+     * @return
+     */
     public Orientation getAngularOrientation(AxesReference reference, AxesOrder order, org.firstinspires.ftc.robotcore.external.navigation.AngleUnit angleUnit){
         int deltaFL = flCnt - flArray[counter-1];
         int deltaFR = frCnt - frArray[counter-1];

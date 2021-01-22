@@ -44,7 +44,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.PurePursuit.PurePursuitAutoDemo;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.PurePursuit.PurePursuitAutoDemo;
 import UltimateGoal_RobotTeam.Utilities.PursuitLines;
 import UltimateGoal_RobotTeam.Utilities.PursuitPoint;
 import OfflineCode.Field.FieldConfiguration;
@@ -67,7 +67,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 // DECLARE VARIABLES NEEDED FOR TEST CODE
 //****************************************
     private FieldConfiguration fc = new FieldConfiguration();
-    PurePursuitAutoDemo ppOpMode = new PurePursuitAutoDemo();
+//    PurePursuitAutoDemo ppOpMode = new PurePursuitAutoDemo();
 
     boolean writeBR = false;
     boolean writeRR = false;
@@ -77,7 +77,7 @@ public class OfflineOpModeLibs extends BasicAuto {
     boolean writeRW2 = false;
 
     //********** Added to OfflineOpModeLibs - were in BasicAuto or Hardware ******************
-    boolean robotSeeStone = false;
+    boolean robotSeeRing = false;
 
     private int robotNumber = 1;
 
@@ -180,7 +180,7 @@ public class OfflineOpModeLibs extends BasicAuto {
         Arrays.fill(wgaAngleArray,IMUCounter,(size), wgaAngleArray[IMUCounter-1]);
 
         double deltaTime = (timeArray[1] - timeArray[0]);
-        for(int k = IMUCounter-1; k < size;k++){// needed to reduce counter by 1 -- means there is an extra count somewhere
+        for(int k = IMUCounter-1; k < size;k++){
             timeArray[k] = timeArray[k-1] + deltaTime;
             robotUG.driveTrain.imu.RobotPoints.add(robotUG.driveTrain.imu.RobotPoints.get(k-1));
 
@@ -194,6 +194,7 @@ public class OfflineOpModeLibs extends BasicAuto {
             fc.RedWobble2Points.add(fc.RedWobble2Points.get(k-1));
             fc.PursuitPoints.add(fc.PursuitPoints.get(k-1));
             fc.NavPoints.add(fc.NavPoints.get(k-1));
+            fc.RobotPoints.add(fc.RobotPoints.get(k-1));//Added this to be able to replace imu.RobotPoints
 
         }
 
@@ -379,12 +380,12 @@ public class OfflineOpModeLibs extends BasicAuto {
 
         collectorArray[IMUCounter] = (int) Math.round(robotUG.collector.collectorPower);
         conveyorArray[IMUCounter] = (int) Math.round(robotUG.conveyor.conveyor_Power);
-        shooterArray[IMUCounter] = (int) Math.round(robotUG.shooter.shooter_Power);
+        shooterArray[IMUCounter] = (int) Math.round(robotUG.shooter.getShooter_Power());
         wgaAngleArray[IMUCounter] = robotUG.wobbleArm.getArmAngleDegrees() * Math.PI/180.0;
 
         fc.updateField(this);
 
-        robotSeeStone= fc.ringFound;
+        robotSeeRing = fc.ringFound;
 
 
         if(haveBlueRing){writeBR = true;}
@@ -411,7 +412,7 @@ public class OfflineOpModeLibs extends BasicAuto {
     //----------------------------------------------------------------------------------------------
     // TEST MODE METHOD prepOpMode is used to initialize offline items - instead of initOpMode
     //----------------------------------------------------------------------------------------------
-   public void prepOpMode() {
+   public void prepOpMode(int ringNumber) {
 
    //************* BELOW IS TEST CODE ********************************
 
@@ -419,7 +420,7 @@ public class OfflineOpModeLibs extends BasicAuto {
        testModeActive = true;// set for each OpMode
 
 
-       ringSelect = 1;// Options are 0, 1, 4 rings on the field
+       ringSelect = ringNumber;// Options are 0, 1, 4 rings on the field
        fc = new FieldConfiguration(ringSelect);//KS added 12/20 to set stone position
 
        haveBlueRing = false;
@@ -453,7 +454,12 @@ public class OfflineOpModeLibs extends BasicAuto {
 
        //************* ABOVE IS TEST CODE ********************************
 
-       // %%%%%% UPDATED BELOW FOR HardwareRobotMulti class %%%%%%%%%
+       //************* BELOW IS FROM OpMopde INITIALIZE ********************************
+
+       runtime.reset();
+       telemetry.addLine("NOT READY DON'T PRESS PLAY");
+       telemetry.update();
+       telemetry.setAutoClear(false);//allow all the lines of telemetry to remain during initialization
 
        // configure the robot needed - for this demo only need DriveTrain
        // configArray has True or False values for each subsystem HW element
@@ -467,12 +473,18 @@ public class OfflineOpModeLibs extends BasicAuto {
         * [5] = ImageRecog
         * items that are 1 = true will be configured to the robot
         */
-       // HW ELEMENTS *****************    DriveTrain  Shooter  Conveyor	WobbleArm	Collector   ImageRecog
-       boolean[] configArray = new boolean[]{ true, 	true, 	true, 		true, 		true,       false};
+       // HW ELEMENTS *****************    DriveTrain  Shooter  Conveyor	WobbleArm	Collector	ImageRecog
+       boolean[] configArray = new boolean[]{ true, 	true, 	true, 		true, 		true,		false};//Offline needs to disable collector
 
-       robotUG = new HardwareRobotMulti(this, configArray, testModeActive);
+       // READ HASHMAP FILE
+       readOrWriteHashMapOffline();
 
-       telemetry.update();
+       robotUG = new HardwareRobotMulti(this, configArray,testModeActive);
+       //Split OpMode methods to have ove for above(Configure) )which happens before the items below(Initialize) both Offline code and real OpMode
+       // OR call the Inialize() method and then run a postInit() method in Offline code to set offline HW
+
+
+
        //***********************************************************
        //Code that needs to be Kept in init to initialize functions
        //***********************************************************
@@ -493,16 +505,23 @@ public class OfflineOpModeLibs extends BasicAuto {
        shooterArray= new int[size];
        wgaAngleArray= new double[size];
 
-       fc.updateField(this);
+       fc.NavPoints.clear();
+       fc.PursuitPoints.clear();
+       fc.RobotPoints.clear();
 
+//       fc.updateField(this);
+
+       fieldPoints.clear();
 
        robotUG.driveTrain.imu.RobotPoints.clear();
 //       robotUG.driveTrain.imu.RobotPoints.add(new FieldLocation(robotUG.driveTrain.imu.robotOnField.x, robotUG.driveTrain.imu.robotOnField.y, robotUG.driveTrain.imu.robotOnField.theta));
 
        //Setting counter to capture array data is unique to offline running of code
-       counter = 1;
+       counter = 1;//could this be set to 0?
        robotUG.driveTrain.imu.counter = counter;
 
+
+       // Tell the robot where it's starting location and orientation on the field is
 
        if(robotNumber == 1) {
            cons.DRIVE_POWER_LIMIT = 1.0;
@@ -511,8 +530,8 @@ public class OfflineOpModeLibs extends BasicAuto {
            robotUG.driveTrain.backRight.motorTol=1.0;
            robotUG.driveTrain.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
-//           robotUG.driveTrain.robotFieldLocation.setLocation(-36,-63,90);// FROM CompleteAutonomous
-           robotUG.driveTrain.imu.robotOnField.x = -36;//initial x position on field in inches
+//           robotFieldLocation.setLocation(-57,-63,90)// FROM CompleteAutonomous
+           robotUG.driveTrain.imu.robotOnField.x = -57;//initial x position on field in inches
            robotUG.driveTrain.imu.robotOnField.y = -63;//initial y position on field in inches
            robotUG.driveTrain.imu.robotOnField.theta = 90;//initial robot angle orientation on field in degrees from EAST CCW +
            robotUG.driveTrain.imu.priorAngle = robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST CCW +
@@ -534,7 +553,7 @@ public class OfflineOpModeLibs extends BasicAuto {
            robotUG.driveTrain.backRight.motorTol=1.0;
            robotUG.driveTrain.backLeft.motorTol=1.0;
            //field angle orientation is + = CCW , while robot frame is + = CW
-           robotUG.driveTrain.imu.robotOnField.x = -48;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
+           robotUG.driveTrain.imu.robotOnField.x = -24;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
            robotUG.driveTrain.imu.robotOnField.y = -60;//initial y position on field in inches (WAS 48)
            robotUG.driveTrain.imu.robotOnField.theta = 45;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
            robotUG.driveTrain.imu.priorAngle = robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
@@ -581,22 +600,36 @@ public class OfflineOpModeLibs extends BasicAuto {
            robotUG.driveTrain.robotFieldLocation = robotUG.driveTrain.imu.robotOnField;
 
        }
-       robotUG.driveTrain.initIMUtoAngle(-robotUG.driveTrain.robotFieldLocation.theta);//ADDED HERE FOR OFFLINE, NEEDS TO BE IN initialize() method in OpMode
        telemetry.addData("Robot Number ", "%d",robotNumber);
        telemetry.addData("drivePowerLimit ", "%.2f",cons.DRIVE_POWER_LIMIT);
+
+       /* Below from OpMode
+       robotUG.wobbleArm.wobbleGoalServo.setPosition(0.8);//this is a loose grip
+       robotUG.driveTrain.robotFieldLocation.setLocation(-57,-63,90);
+        //Code above is unique to the OpMode*/
+
+       /* Code below is general for all cases*/
+       robotUG.driveTrain.initIMUtoAngle(-robotUG.driveTrain.robotFieldLocation.theta);//ADDED HERE FOR OFFLINE, NEEDS TO BE IN initialize() method in OpMode
+       robotUG.driveTrain.robotX = 0;// robot local coordinates always start at 0
+       robotUG.driveTrain.robotY = 0;
+
+       // Update telemetry to tell driver than robot is ready
+       telemetry.addData("STATUS", "MultiRobot Hardware Configured!!");
+//       for(int j=0;j<configArray.length;j++) {
+//           telemetry.addData("ConfigArray Index", "%d with Value: %s", j, configArray[j]);
+//       }
        telemetry.addData("Robot Field Location", "X = %.2f inch, Y = %.2f inch, Theta = %.2f degrees",robotUG.driveTrain.robotFieldLocation.x, robotUG.driveTrain.robotFieldLocation.y, robotUG.driveTrain.robotFieldLocation.theta);
+       telemetry.addLine(" ");
+       telemetry.addLine("*********************************************");
+       telemetry.addData("WARNING", "VERIFY THAT DRIVE POWER LIMIT IS LOW FOR INITIAL TESTS");
+       telemetry.addLine("*********************************************");
+       telemetry.addLine(" ");
+       telemetry.addData(">", "Press Play to start");
        telemetry.update();
-       // COMMENTED OUT BECAUSE CAUSING ERRORS IN ROBOT IMU POSITION
-//       robotUG.driveTrain.angleUnWrap();
-//       robotUG.driveTrain.offset = robotUG.driveTrain.robotHeading;
-//       robotUG.driveTrain.robotHeading-=robotUG.driveTrain.offset;//set robotHeading = 0 for all opModes regardless of position, but track actual angle in IMU
-       // ** END COMMENTED ****
+       telemetry.setAutoClear(true);//revert back to telemetry.update clearing prior display
+
+
        fc.updateField(this);
-       //Initialize starting position on field, field center is assumed (0,0), 0 field angle is pointing EAST
-//       robotUG.driveTrain.imu.fieldXArray[0] = robotUG.driveTrain.imu.fieldX; //initial x position on field in inches
-//       robotUG.driveTrain.imu.fieldYArray[0] = robotUG.driveTrain.imu.fieldY; //initial y position on field in inches
-//       robotUG.driveTrain.imu.robotAngleArray[0] = robotUG.driveTrain.imu.priorAngle; //initial robot angle orientation on field in degrees from EAST
-//       robotUG.driveTrain.imu.RobotPoints.add(new FieldLocation(robotUG.driveTrain.imu.robotOnField.x, robotUG.driveTrain.imu.robotOnField.y, robotUG.driveTrain.imu.robotOnField.theta));
 
    }
 
@@ -620,247 +653,143 @@ public class OfflineOpModeLibs extends BasicAuto {
 
 
         if (robotNumber ==1) {
-                runtime.reset();
-                 cons.DRIVE_POWER_LIMIT = 0.7;
-                cons.STEERING_POWER_LIMIT = 0.6;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
-                cons.STEERING_POWER_GAIN = 0.03;//was 0.05
-                robotUG.driveTrain.setGearRatio(40.0);
+            runtime.reset();
+            haveBlueWobble1 = true;//Robot is gripping wobble goal
 
-                fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y));
+            robotUG.wobbleArm.wobbleGoalServo.setPosition(0.9);//this is a firm grip on the goal
 
-                robotUG.wobbleArm.wobbleGoalServo.setPosition(0.9);
-                // Add point for driving to view ring stack
-                fieldPoints.add(new PursuitPoint(-36, -43));
+            // Add points for Pure Pursuit motion - always start with where the robot was initialized to be on the field
+            /* Drive to Wobble Goal and Scan the Number of Rings*/
 
-                // Simple set of points - diamond or square
-//                fieldPoints.add(new PursuitPoint(-30,-30));
-//                fieldPoints.add(new PursuitPoint(-60,-30));
-//                fieldPoints.add(new PursuitPoint(-60,-60));
-//                fieldPoints.add(new PursuitPoint(-38,-60));
-
-                // Slalom course - doesn't get to 180 so should be good
-//                fieldPoints.add(new PursuitPoint(12,0));
-//                fieldPoints.add(new PursuitPoint(12,60));
-//                fieldPoints.add(new PursuitPoint(24,60));
-//                fieldPoints.add(new PursuitPoint(24,0));
-//                fieldPoints.add(new PursuitPoint(36, 0));
-//                fieldPoints.add(new PursuitPoint(36,60));
-//                fieldPoints.add(new PursuitPoint(48,60));
-//                fieldPoints.add(new PursuitPoint(48,0));
-//                fieldPoints.add(new PursuitPoint(60, 0));
-//                fieldPoints.add(new PursuitPoint(60,60));
-
-
-                // angled line
-//                fieldPoints.add(new PursuitPoint(-24,-36));
-//                fieldPoints.add(new PursuitPoint(-24,-24));
-//                fieldPoints.add(new PursuitPoint(-30,-24));
-//                fieldPoints.add(new PursuitPoint(-30,-12));
-//                fieldPoints.add(new PursuitPoint(-60,-12));
-//                fieldPoints.add(new PursuitPoint(-60,12));
-
-                // Circle
-//                fieldPoints.add(new PursuitPoint(34,10.0));
-//                ArrayList<PursuitPoint> circlePoints;
-//                circlePoints = PursuitPath.defineArc(new PursuitPoint(12,12), 24.0, 0.0, 330*Math.PI/180,  25, PursuitPath.pathDirection.POSITIVE);
-//                fieldPoints.addAll(circlePoints);
-//                ArrayList<PursuitPoint> rectPoints;
-//                rectPoints = PursuitPath.defineRectangle(36, 0, 24, -60, 10);
-//                fieldPoints.addAll(rectPoints);
+            fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y)); //x: -57, y: -63
+            fieldPoints.add(new PursuitPoint(-57, -57));
+            fieldPoints.add(new PursuitPoint(-44, -36));// WAS (-40, -46.2) updated to better view rings
 
             // Display the robot points on the screen to confirm what was entered - needed for troubleshooting only
             for(int h=0;h<fieldPoints.size();h++) {
                 telemetry.addData("Point", "%d: %.2f, %.2f", h, fieldPoints.get(h).x, fieldPoints.get(h).y);
             }
-            telemetry.update();
 
-            telemetry.addData("Drive Power Limit Updated", cons.DRIVE_POWER_LIMIT);
-            telemetry.addData("Steering Power Limit Updated", cons.STEERING_POWER_LIMIT);
-            telemetry.addData("Steering Power Gain Updated", cons.STEERING_POWER_GAIN);
-            telemetry.addData("Forward Scale Factor", cons.adjForward);
-            telemetry.addData("Right Scale Factor", cons.adjRight);
-            telemetry.addData("Rotation Scale Factor", cons.adjRotate);
-            telemetry.update();
-            telemetry.addData("Robot Field Location", "X = %.2f inch, Y = %.2f inch, Theta = %.2f degrees",robotUG.driveTrain.robotFieldLocation.x, robotUG.driveTrain.robotFieldLocation.y, robotUG.driveTrain.robotFieldLocation.theta);
-            telemetry.addData("Drive Train Gear Ratio", " %.1f : 1 & deg to Counts %.1f",robotUG.driveTrain.gearRatio, robotUG.driveTrain.gearRatioDegToCounts);
-            telemetry.update();
+            robotUG.driveTrain.drivePursuit(fieldPoints,this,"To View the Rings");
 
-            haveBlueWobble1 = true;
-
-            robotUG.driveTrain.drivePursuit(fieldPoints,this,"To The RING STACK");
-
-            // Add point for driving to wobble goal location
-
-            /** Choose Where to go Next and Pick up Wobble Goal
-             * case "None": Zone A pursuit points
-             * case "Single": Zone B pursuit points
-             * case "Quad": Zone C pursuit points
-             * case "Multiple": error - seeing multiple objects, no selection
+            String ringsViewed;//Define string for returning what rings were seen
+            if(testModeActive){//Need this code for Offline
+                int counts = 0;
+                while(counts < 10) {// 10 counts or data points should equal 1 offline second (300 points = 30 s)
+                    telemetry.addLine("VIEWING RINGS");
+                    telemetry.addData("Counts", " %d", counts);
+                    telemetry.update();
+                    robotUG.driveTrain.robotNavigator(this);
+                    counts+=1;
+                }
+                ringsViewed = testModeViewRings();
+            }
+            else {//This is what runs on the robot
+                double start = runtime.time();
+                while ((runtime.time() - start) < 2.0) {
+                    // Do nothing but report TM for counter and wait for robot to settle before looking at rings
+                    robotUG.imageRecog.getTelemetry(this);
+                    telemetry.update();
+                }
+//		 	  ringsViewed = robotUG.imageRecog.viewRings(this, 25);//baseline method that runs for set number of loops
+                ringsViewed = robotUG.imageRecog.viewRingsTimed(this, 0.5);// ALTERNATE method that runs based on time
+            }
+            /* COACH NOTE: imageRecog methods end with telemetry being added but waiting for a telemetry.update()
+             * -- expect an update in the main OpMode or a pressAToContinue method to follow
              */
-            if(ringSelect == 0){// Options are 0, 1, 4 rings on the field
-                 decideWobbleGoalZone("None");
+            telemetry.addLine("------------------------------------");
+            telemetry.addData("Image Recognition Completed", "String Value: %s", ringsViewed);
+            if(testModeActive){
+                telemetry.update();//Offline code can't access gamepad or imageRecognition
             }
-            else if(ringSelect == 1){// Options are 0, 1, 4 rings on the field
-                decideWobbleGoalZone("Single");
+            else { // This is what runs on robot
+                pressAToContinue();
+                robotUG.imageRecog.shutdown();//shutdown after pressA to allow the driver to observe screen before moving on
             }
-            else {// Options are 0, 1, 4 rings on the field
-                decideWobbleGoalZone("Quad");
-            }
-            for(int h=0;h<fieldPoints.size();h++) {
-                telemetry.addData("Point", "%d: %.2f, %.2f", h, fieldPoints.get(h).x, fieldPoints.get(h).y);
-            }
-            telemetry.update(); //Display points
-            /* TEST CODE TO DRAW LINES FOR VIZ */
-            for(int h=0;h<fieldPoints.size()-1;h++) {
-                lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
+            /* Choose Where to go Next and Pick up Wobble Goal */
+            decideWobbleGoalZone(ringsViewed);
+
+            /* TEST CODE TO DRAW LINES FOR VISUALIZATION */
+            if(testModeActive) {
+                for (int h = 0; h < fieldPoints.size() - 1; h++) {
+                    lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h + 1).x, fieldPoints.get(h + 1).y));
+                }
             }
             robotUG.driveTrain.drivePursuit(fieldPoints,this,"To Wobble Goal drop zone");
 
-            /* COACH ADDITIONS: added helpful telemetry
-             *  - Add telemetry before every "pressAToContinue" to provide updates on the robot's progress
-             *  - Report the step complete, robot position, arm position, etc.
-             */
-
-            telemetry.addLine("Drive to Wobble Goal Drop Zone Completed");
-            telemetry.addData("Desired Position (X, Y)", " \t\t( %1.1f, %1.1f)", robotUG.driveTrain.targetPoint.x, robotUG.driveTrain.targetPoint.y);
-            telemetry.addData("Robot Position (X, Y)", " \t\t( %1.1f, %1.1f)", robotUG.driveTrain.robotFieldLocation.x, robotUG.driveTrain.robotFieldLocation.y);
-            telemetry.addData("Robot Angles", " \t Desired: %1.1f, \t Actual: %1.1f", robotUG.driveTrain.targetHeading, robotUG.driveTrain.robotHeading);
-            telemetry.update();// Review robot's motion
-
-            /** Rotate 180*, Drop the Wobble Goal and Rotation 180 */
+            /* Rotate 180*, Drop the Wobble Goal and Rotation 180 */
             robotUG.driveTrain.IMUDriveRotate(90, "Rotate 180*", this);
 
-            telemetry.addLine("Rotate to Drop Goal");
-            telemetry.addData("Desired Position (X, Y)", " \t\t( %1.1f, %1.1f)", robotUG.driveTrain.targetPoint.x, robotUG.driveTrain.targetPoint.y);
-            telemetry.addData("Robot Position (X, Y)", " \t\t( %1.1f, %1.1f)", robotUG.driveTrain.robotFieldLocation.x, robotUG.driveTrain.robotFieldLocation.y);
-            telemetry.addData("Robot Angles", " \t Desired: %1.1f, \t Actual: %1.1f", 90.0, robotUG.driveTrain.robotHeading);
-
-            telemetry.update();// Review rotation
-
             robotUG.wobbleArm.dropWobble(this);
-            haveBlueWobble1 = false;
 
-            telemetry.addLine("Drop Goal");
-            telemetry.addData("Wobble Goal Arm", " Command: %1.2f, Actual: %d", robotUG.wobbleArm.wobbleArmTargetAngle, robotUG.wobbleArm.wobbleArmTarget);
-            telemetry.addData("Wobble Goal Servo", " \t Desired: %1.1f, \t Actual: %1.1f", 90.0, robotUG.driveTrain.robotHeading);
-            telemetry.addLine("Check that Wobble Goal Has Been Dropped ...");
-
-            telemetry.update();//Review wobble goal drop
-
-            /* Coach Note: changing to go to high goal and to clear points and avoid rotation
-             *
-             */
-            fieldPoints.clear();
+            fieldPoints.clear();// clear all the prior points
             fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x, robotUG.driveTrain.robotFieldLocation.y));
+
             fieldPoints.add(new PursuitPoint(-48, -8));/* COACH CHANGED - for high goal - allow all options to align */
             fieldPoints.add(new PursuitPoint(-30, -8));/* COACH CHANGED - for high goal */
-            //UPDATED TO MOVE BACK (more negative) to help shooter go in
 
-            /* TEST CODE TO DRAW LINES FOR VIZ */
-            for(int h=0;h<fieldPoints.size()-1;h++) {
-                lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
+            /* TEST CODE TO DRAW LINES FOR VISUALIZATION */
+            if(testModeActive) {
+                for (int h = 0; h < fieldPoints.size() - 1; h++) {
+                    lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h + 1).x, fieldPoints.get(h + 1).y));
+                }
             }
+            //TURN ON SHOOTER -- allow time to power up to full speed while driving, UPDATE TO SHOOTER SPEED METHOD
+            robotUG.shooter.setShooter_Power(1.0);//1.0 for high goal too much @ Y = -6, trying -8
+            /* Alternative for Speed Control Below */
+//		robotUG.shooter.setShooterMode(true);//Make speed control active
+//		robotUG.shooter.shooterSpeedControl(1300, this);//Set speed in RPM
 
-            //TURN ON SHOOTER -- allow time to power up to full speed while driving
-            robotUG.shooter.setShooter_Power(-1.0);
-            updateIMU();
-
-            /** Drive to and Shoot the Powershots */
+            /* Drive to and Shoot the Powershots */
             robotUG.driveTrain.drivePursuit(fieldPoints,this,"To PowerShot Shooting Position");
-
-            /** Coach Note: need to rotate to face the PowerShot targets
-             * see added lines below
-             */
-
 
             robotUG.driveTrain.IMUDriveRotate(-90, "Rotate to Face Targets", this);/* COACH ADDED */
 
-            // make sure you are at -90 angle
-            telemetry.addLine(" VERIFY robot is aligned Shoot Target #1");
-            telemetry.addData("Heading", " %1.1f",  robotUG.driveTrain.robotHeading);
-            telemetry.addData("Location", " (%1.1f, %1.1f)",  robotUG.driveTrain.robotFieldLocation.x,robotUG.driveTrain.robotFieldLocation.y);
-            telemetry.update();
-
-            // shoot high goal
-            //TURN ON CONVEYOR
+            // shoot HIGH GOAL
+            //TURN ON CONVEYOR & COLLECTOR (last ring is partially under collector)
             robotUG.conveyor.setMotion(Conveyor.motionType.UP);
             robotUG.collector.collectorWheel.setPower(-1.0);//need negative power to collector rings
-            updateIMU();
-
-            int counts = 0;
-            while(counts < 50) {
-                telemetry.addLine("Shoot High Goal x3");
-                telemetry.addData("Counts", " %d", counts);
-                telemetry.addData("Shooter Power", "  %1.2f",  robotUG.shooter.shooter_Power);
-                telemetry.addData("Conveyor Power", " %1.1f",  robotUG.conveyor.conveyor_Power);
-                telemetry.addLine("Press GamePad2 'BACK' once shooter fires ...");
-                telemetry.update();
-                robotUG.driveTrain.robotNavigator(this);
-                updateIMU();
-                counts+=1;
+            if(testModeActive){//accessing time will exceed size of data file and cause errors, run by number of counts
+                int counts = 0;
+                while(counts < 50) {
+                    telemetry.addLine("Shoot High Goal x3");
+                    telemetry.addData("Counts", " %d", counts);
+                    telemetry.addData("Shooter Power", "  %1.2f",  robotUG.shooter.getShooter_Power());
+                    telemetry.addData("Conveyor Power", " %1.1f",  robotUG.conveyor.conveyor_Power);
+                    telemetry.addLine("Press GamePad2 'BACK' once shooter fires ...");
+                    telemetry.update();
+                    robotUG.driveTrain.robotNavigator(this);
+                    counts+=1;
+                }
+            }
+            else {
+                double startTime = runtime.time();
+                double shootTime = runtime.time() - startTime;
+                while (shootTime < 10.0) {//Since no sensors purely timed set of shots
+                    shootTime = runtime.time() - startTime;
+                    telemetry.addLine("Shoot high goal x 3");
+                    telemetry.addData("Timer", " %1.2f", shootTime);
+                    telemetry.addData("Shooter Power", "  %1.2f", robotUG.shooter.getShooter_Power());
+                    telemetry.addData("Conveyor Power", " %1.1f", robotUG.conveyor.conveyor_Power);
+                    telemetry.addLine("Press GamePad2 'BACK' once shooter fires ...");
+                    telemetry.update();
+                }
             }
             //TURN OFF CONVEYOR & COLLECTOR OFF
             robotUG.conveyor.setMotion(Conveyor.motionType.OFF);
             robotUG.collector.collectorWheel.setPower(0.0);
+            robotUG.shooter.shutdown();
+//		telemetry.addData("Time to Shoot Target 3 targets", " %1.2f", shootTime);
+//		pressAToContinue();//record the time to fire shot #1 and observe outcome
 
-            updateIMU();
-
-//            robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.RightLeft, 7.5, -90, "Move Right 7.5 inch to shot", this);
-//
-//            //Make sure that robot is lined up for 2nd shot
-//            telemetry.addLine(" VERIFY robot is aligned Shoot Target #2");
-//            telemetry.addData("Heading", " %1.1f",  robotUG.driveTrain.robotHeading);
-//            telemetry.addData("Location", " (%1.1f, %1.1f)",  robotUG.driveTrain.robotFieldLocation.x,robotUG.driveTrain.robotFieldLocation.y);
-//            telemetry.update();
-//            // shoot powershot
-//            //TURN ON CONVEYOR
-//            robotUG.conveyor.setMotion(Conveyor.motionType.UP);
-//            updateIMU();
-//
-//            counts = 0;
-//            while(counts < 10) {
-//                telemetry.addLine("Shoot Target #2");
-//                telemetry.addData("Counts", " %d", counts);
-//                telemetry.addData("Shooter Power", "  %1.2f",  robotUG.shooter.shooter_Power);
-//                telemetry.addData("Conveyor Power", " %1.1f",  robotUG.conveyor.conveyor_Power);
-//                telemetry.addLine("Press GamePad2 'BACK' once shooter fires ...");
-//                telemetry.update();
-//                updateIMU();
-//                counts+=1;
-//            }
-//            //TURN OFF CONVEYOR
-//            robotUG.conveyor.setMotion(Conveyor.motionType.OFF);
-//            updateIMU();
-//            robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.RightLeft, 7.5, -90, "Move Right 7.5 inch to shot", this);
-//            //Make sure that robot is lined up for 2nd shot
-//            telemetry.addLine(" VERIFY robot is aligned Shoot Target #3");
-//            telemetry.addData("Heading", " %1.1f",  robotUG.driveTrain.robotHeading);
-//            telemetry.addData("Location", " (%1.1f, %1.1f)",  robotUG.driveTrain.robotFieldLocation.x,robotUG.driveTrain.robotFieldLocation.y);
-//            telemetry.update();
-//            //TURN ON CONVEYOR
-//            robotUG.conveyor.setMotion(Conveyor.motionType.UP);
-//            updateIMU();
-//            counts = 0;
-//            while(counts < 10) {
-//                telemetry.addLine("Shoot Target #3");
-//                telemetry.addData("Counts", " %d", counts);
-//                telemetry.addData("Shooter Power", "  %1.2f",  robotUG.shooter.shooter_Power);
-//                telemetry.addData("Conveyor Power", " %1.1f",  robotUG.conveyor.conveyor_Power);
-//                telemetry.addLine("Press GamePad2 'BACK' once shooter fires ...");
-//                telemetry.update();
-//                updateIMU();
-//                counts+=1;
-//            }
-//            //TURN OFF CONVEYOR & SHOOTER
-//            robotUG.conveyor.setMotion(Conveyor.motionType.OFF);
-//            robotUG.shooter.setShooter_Power(0.0);
-//            updateIMU();
             robotUG.driveTrain.IMUDriveFwdRight(DriveTrain.moveDirection.FwdBack, 12, -90, "Move Fwd ~6 in. to score points", this);
             /* INCREASED DRIVING DISTANCE BASED ON SHOOTING LOCATION*/
+
             //Telemetry output after driving completed
             telemetry.addData("Driving Completed", "...successfully?!?");
 
             telemetry.addLine("----------------------------------");
+            telemetry.addData("Timer", "%.1f",runtime.time());
 
             telemetry.addData("Robot Heading", " Desired: %.2f, FieldNav: %.2f, RobotHeading: %.2f", robotUG.driveTrain.targetHeading, robotUG.driveTrain.robotFieldLocation.theta, robotUG.driveTrain.robotHeading);
             telemetry.addData("Robot Location", " Desired(X,Y): (%.2f,%.2f), Navigator(X,Y): (%.2f,%.2f)",
@@ -872,18 +801,21 @@ public class OfflineOpModeLibs extends BasicAuto {
             telemetry.addData("Final Pursuit Point", " (%.2f, %.2f)", fieldPoints.get(fieldPoints.size()-1).x,fieldPoints.get(fieldPoints.size()-1).y);
             telemetry.addLine("----------------------------------");
             telemetry.addLine("Observe telemetry and Press A to shutdown");
-            telemetry.update();
-
+            if(testModeActive){// Can't access gamePad
+                telemetry.update();
+            }
+            else {// PressA included so the runtime and final reported position can be observed
+                pressAToContinue();//observe telemetry before shutdown, without pressA the display is cleared
+            }
             robotUG.shutdownAll();
 
-            for(int h=0;h<fieldPoints.size()-1;h++) {
-                lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
-            }
-//  ADD LINES TO DISPLAY
-
-            }
+        }
         if(robotNumber ==2){
             runtime.reset();
+            haveBlueWobble2 = true;
+            fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y)); //start
+            fieldPoints.add(new PursuitPoint(0  ,-24)); //start
+            robotUG.driveTrain.drivePursuit(fieldPoints,this,"Drive w/ Wobble Goal");
 
 
 //            cons.DRIVE_POWER_LIMIT = 0.4;
@@ -919,47 +851,58 @@ public class OfflineOpModeLibs extends BasicAuto {
 
 //            robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
 
-//            haveBlueWobble2 = false;
-            writeBR = true;
-            writeBW2 = true;
         }
         if(robotNumber ==3) {
-                runtime.reset();
-            cons.DRIVE_POWER_LIMIT = 0.4;
-            cons.STEERING_POWER_LIMIT = 0.4;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
-            cons.STEERING_POWER_GAIN = 0.03;//was 0.05
+            runtime.reset();
+            haveRedWobble1 = true;
+            fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y)); //start
+            fieldPoints.add(new PursuitPoint(12  ,0)); //start
+            robotUG.driveTrain.drivePursuit(fieldPoints,this,"Drive w/ Wobble Goal");
+//            cons.STEERING_POWER_LIMIT = 0.4;//was somewhere between 0.60 and 0.72 X DRIVE_POWER_LIMIT
+//            cons.STEERING_POWER_GAIN = 0.03;//was 0.05
+//
+//                fieldPoints.clear();
+//                lines.clear();
+//                fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y));
+//                // angled line
+//                fieldPoints.add(new PursuitPoint(24,-36));
+//                fieldPoints.add(new PursuitPoint(24,-24));
+//                fieldPoints.add(new PursuitPoint(30,-24));
+//                fieldPoints.add(new PursuitPoint(30,-12));
+//                fieldPoints.add(new PursuitPoint(60,-12));
+//                fieldPoints.add(new PursuitPoint(60,12));
+//
+//
+//                for(int h=0;h<fieldPoints.size()-1;h++) {
+//                    lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
+//                }
+//                haveRedWobble1 = true;
+//                robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
+//
+//                telemetry.addData("Drive Power Limit Updated", cons.DRIVE_POWER_LIMIT);
+//                telemetry.addData("Steering Power Limit Updated", cons.STEERING_POWER_LIMIT);
+//                telemetry.addData("Steering Power Gain Updated", cons.STEERING_POWER_GAIN);
+//                telemetry.addData("Forward Scale Factor", cons.adjForward);
+//                telemetry.addData("Right Scale Factor", cons.adjRight);
+//                telemetry.addData("Rotation Scale Factor", cons.adjRotate);
 
-                fieldPoints.clear();
-                lines.clear();
-                fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y));
-                // angled line
-                fieldPoints.add(new PursuitPoint(24,-36));
-                fieldPoints.add(new PursuitPoint(24,-24));
-                fieldPoints.add(new PursuitPoint(30,-24));
-                fieldPoints.add(new PursuitPoint(30,-12));
-                fieldPoints.add(new PursuitPoint(60,-12));
-                fieldPoints.add(new PursuitPoint(60,12));
 
-
-                for(int h=0;h<fieldPoints.size()-1;h++) {
-                    lines.add(new PursuitLines(fieldPoints.get(h).x, fieldPoints.get(h).y, fieldPoints.get(h+1).x, fieldPoints.get(h+1).y));
-                }
-                haveRedWobble1 = true;
-                robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
-
-                telemetry.addData("Drive Power Limit Updated", cons.DRIVE_POWER_LIMIT);
-                telemetry.addData("Steering Power Limit Updated", cons.STEERING_POWER_LIMIT);
-                telemetry.addData("Steering Power Gain Updated", cons.STEERING_POWER_GAIN);
-                telemetry.addData("Forward Scale Factor", cons.adjForward);
-                telemetry.addData("Right Scale Factor", cons.adjRight);
-                telemetry.addData("Rotation Scale Factor", cons.adjRotate);
-
-                writeRR = true;
-                writeRW1 = true;
             }
         if(robotNumber ==4 ) {
             runtime.reset();
-
+            haveRedWobble2 = true;
+            fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y)); //start
+            fieldPoints.add(new PursuitPoint(48,-36));// Drive Forward for both X & Y
+            robotUG.driveTrain.drivePursuit(fieldPoints,this,"Move Around");
+            fieldPoints.clear();
+            fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y)); //current location
+            fieldPoints.add(new PursuitPoint(60, -12));// Return to start
+            robotUG.driveTrain.drivePursuit(fieldPoints,this,"Go to a Zone");
+            robotUG.wobbleArm.dropWobble(this);//drop goal
+            fieldPoints.clear();//clear points
+            fieldPoints.add(new PursuitPoint(robotUG.driveTrain.robotFieldLocation.x  ,robotUG.driveTrain.robotFieldLocation.y)); //current location
+            fieldPoints.add(new PursuitPoint(24, 0));// Park
+            robotUG.driveTrain.drivePursuit(fieldPoints,this,"Go Park");
             // for tests and smaller field trials the robot is initialized to (0,0) and 0.0 degrees
 //                robotUG.driveTrain.initIMUtoAngle(-90.0); // NEEDS TO BE IN ACTUAL OpMode
 //            cons.DRIVE_POWER_LIMIT = 0.4;
@@ -996,7 +939,7 @@ public class OfflineOpModeLibs extends BasicAuto {
 //            robotUG.driveTrain.drivePursuit(fieldPoints, this, "Drive multi-lines");
 //
 //            haveRedWobble2 = false;
-            writeRW2 = true;
+
         }
 
     } //MAIN OpMode PROGRAM END
@@ -1025,17 +968,17 @@ public class OfflineOpModeLibs extends BasicAuto {
         for(int h = 1; h<5;h++) {
 
             OffLibs.robotNumber = h;//!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            OffLibs.foundationPosChange = 0;// 26 for unmoved FoundationOpMode, 0 for moved FoundationOpMode
-            OffLibs.insideOutside = 0;// 0 for Inside, 24 for Outside
-            OffLibs.foundationInOut = 26;// 0 for Inside, 26 for Outside
-            if(h ==1 || h==2) {
-                OffLibs.sideColor = 1;// + for Blue for robots 1 & 2
-            }
-            else {
-                OffLibs.sideColor = -1;// - for Red for robots 3 & 4
-
-            }
-            OffLibs.prepOpMode();
+//            OffLibs.foundationPosChange = 0;// 26 for unmoved FoundationOpMode, 0 for moved FoundationOpMode
+//            OffLibs.insideOutside = 0;// 0 for Inside, 24 for Outside
+//            OffLibs.foundationInOut = 26;// 0 for Inside, 26 for Outside
+//            if(h ==1 || h==2) {
+//                OffLibs.sideColor = 1;// + for Blue for robots 1 & 2
+//            }
+//            else {
+//                OffLibs.sideColor = -1;// - for Red for robots 3 & 4
+//
+//            }
+            OffLibs.prepOpMode(1);
 
 //calls code input by programmer into runAutonomous method that comes from main runOpMode
             OffLibs.runOpMode();
@@ -1044,7 +987,8 @@ public class OfflineOpModeLibs extends BasicAuto {
             int countVar = Math.max(size, OffLibs.IMUCounter);
 
             fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dOnField.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
-            OffLibs.fc.writeFieldAsText(fos, OffLibs.robotUG.driveTrain.imu.RobotPoints, countVar);
+//            OffLibs.fc.writeFieldAsText(fos, OffLibs.robotUG.driveTrain.imu.RobotPoints, countVar);//Old method
+            OffLibs.fc.writeFieldAsText(fos, OffLibs.fc.RobotPoints, countVar);//Added info from field configuraiton
 
             fos = new FileOutputStream(OffLibs.fileLocation + String.format("Robot%dAccessories.txt", OffLibs.robotNumber));// Path to directory for IntelliJ code
             OffLibs.writeExtrasToFile(fos);

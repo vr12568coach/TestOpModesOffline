@@ -24,6 +24,7 @@ public class FieldConfiguration {
     public ArrayList<FieldLocation> RedWobble2Points =new ArrayList();
     public ArrayList<FieldLocation> PursuitPoints =new ArrayList();
     public ArrayList<FieldLocation> NavPoints =new ArrayList();
+    public ArrayList<FieldLocation> RobotPoints =new ArrayList();
 
     private String ringType = "ring";
 //    public ArrayList<FieldLocation> GripperPoints =new ArrayList();
@@ -40,10 +41,10 @@ public class FieldConfiguration {
     public FieldLocation blueRingStack = new FieldLocation(-100, -100, 0);
 
     //Define Blue Wobble Goal 1 initial position
-    public FieldLocation blueWobble1 = new FieldLocation(-26, -48, 0);
+    public FieldLocation blueWobble1 = new FieldLocation(-50, -48, 0);
 
     //Define Blue Wobble Goal 2 initial position
-    public FieldLocation blueWobble2 = new FieldLocation(-50, -48, 0);
+    public FieldLocation blueWobble2 = new FieldLocation(-26, -48, 0);
 
     //Define Red Wobble Goal ` initial position
     public FieldLocation redWobble1 = new FieldLocation(26, -48, 0);
@@ -96,7 +97,7 @@ public void updateField(BasicAuto opMode) {
     blueWobble2.setHold(opMode.haveBlueWobble2);
     redWobble1.setHold(opMode.haveRedWobble1);
     redWobble2.setHold(opMode.haveRedWobble2);
-
+    opMode.telemetry.addLine("--------- Field Configuration ---------");
     if(redRing.heldByRobot){
         redRing = updateGameItem(redRing,opMode.robotUG.driveTrain.imu.robotOnField);
     }
@@ -104,16 +105,17 @@ public void updateField(BasicAuto opMode) {
         blueRing = updateGameItem(blueRing,opMode.robotUG.driveTrain.imu.robotOnField);
     }
     if(blueWobble1.heldByRobot){
-        blueWobble1 = updateWobbleGoal(blueWobble1,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm);
+
+        blueWobble1 = updateWobbleGoal(blueWobble1,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm, opMode);
     }
     if(blueWobble2.heldByRobot){
-        blueWobble2 = updateWobbleGoal(blueWobble2,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm);
+        blueWobble2 = updateWobbleGoal(blueWobble2,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm, opMode);
     }
     if(redWobble1.heldByRobot){
-        redWobble1 = updateWobbleGoal(redWobble1,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm);
+        redWobble1 = updateWobbleGoal(redWobble1,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm, opMode);
     }
     if(redWobble2.heldByRobot){
-        redWobble2 = updateWobbleGoal(redWobble2,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm);
+        redWobble2 = updateWobbleGoal(redWobble2,opMode.robotUG.driveTrain.imu.robotOnField, opMode.robotUG.wobbleArm, opMode);
     }
 
     ringFound = seeRing(blueRing, blueRingStack, redRing, redRingStack,opMode.robotUG.driveTrain.imu.robotOnField);
@@ -128,7 +130,12 @@ public void updateField(BasicAuto opMode) {
     RedWobble2Points.add(new FieldLocation(redWobble2.x, redWobble2.y, redWobble2.theta));
 
     PursuitPoints.add(new FieldLocation(opMode.robotUG.driveTrain.targetPoint.x,opMode.robotUG.driveTrain.targetPoint.y,0));
+
+    RobotPoints.add(new FieldLocation(opMode.robotUG.driveTrain.imu.robotOnField.x,opMode.robotUG.driveTrain.imu.robotOnField.y,opMode.robotUG.driveTrain.imu.robotOnField.theta));// ADDED this to change points for field
+
     NavPoints.add(new FieldLocation(opMode.robotUG.driveTrain.robotFieldLocation.x,opMode.robotUG.driveTrain.robotFieldLocation.y,0));
+    opMode.telemetry.addLine("------------- END -------------");
+    opMode.telemetry.update();
 
 }
 
@@ -160,11 +167,14 @@ public void updateField(BasicAuto opMode) {
         }
         return  field;
     }
-    private FieldLocation updateWobbleGoal(FieldLocation wobble, FieldLocation robot, WobbleArm wga){
+    private FieldLocation updateWobbleGoal(FieldLocation wobble, FieldLocation robot, WobbleArm wga, BasicAuto om){
+        double totalAngle = 0.7*wga.convertArmAngleDegrees(wga.wobbleGoalArm.fakePosition)+wga.ARM_INIT_ANGLE_DEG;
+        double length = Math.cos(totalAngle*Math.PI/180.0) * wga.ARM_LENGTH;
         if (wobble.heldByRobot && !wobble.priorHold){
             // robot just grabbed item, set field deltaX & deltaY and angle offset to robot angle
             // use the WGA motor to determine the position for the gripper
-            wobble.deltaY = wga.ARM_Y + (Math.cos((wga.getArmAngleDegrees()+wga.ARM_INIT_ANGLE_DEG)*Math.PI/180.0) * wga.ARM_LENGTH);
+            // use the internal position vs. calling a method that will recalculate and move the arm
+            wobble.deltaY = wga.ARM_Y + length;
             wobble.deltaX = wga.ARM_X;
             wobble.thetaOffset = wobble.theta;
             robot.thetaOffset = robot.theta - wobble.theta;
@@ -181,12 +191,16 @@ public void updateField(BasicAuto opMode) {
         }
         else {
             //update position while held
-            wobble.deltaY = wga.ARM_Y + (Math.cos((wga.getArmAngleDegrees()+wga.ARM_INIT_ANGLE_DEG)*Math.PI/180.0) * wga.ARM_LENGTH);
+            wobble.deltaY = wga.ARM_Y + length;
             wobble.deltaX = wga.ARM_X;
             double angleRotate = robot.theta - robot.thetaOffset - wobble.thetaOffset;
             wobble = rotationMatrix(wobble, robot, angleRotate);
 
         }
+        om.telemetry.addData("\t Blue Wobble "," Hold Status: Current = %s, Prior = %s, ",wobble.heldByRobot,wobble.priorHold);
+        om.telemetry.addData("\t Blue Wobble ","X = %.1f, Y = %.1f",wobble.x,wobble.y);
+        om.telemetry.addData("\t Blue Wobble ","Relative Angle = %.1f, Total Angle = %.1f, length= %.1f,",wga.convertArmAngleDegrees(wga.wobbleGoalArm.fakePosition),totalAngle,length);
+
         return  wobble;
     }
     private FieldLocation rotationMatrix(FieldLocation field, FieldLocation robot, double angle){
