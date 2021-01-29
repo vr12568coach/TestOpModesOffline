@@ -3,7 +3,7 @@ Test bed code to run OpModes in Android Studio on local machine and output data 
 This code emulates hardware interfaces used on the robot, contains field configuration information,
 and OfflineOpModes that run team code offline as a simulation
 
-# 1/22/2021 UPDATED DIRECTIONS FOR INSTALLATION & USE
+# 1/29/2021 UPDATED DIRECTIONS FOR INSTALLATION & USE
 Prior to cloning this project the steps below must be completed:
 1. Create a copy of the FTC project that the team is using to develop robot code
     For example: if you have an Android Studio project "UltimateGoalFTCApp", then copy that directory
@@ -54,10 +54,17 @@ IMPORTANT - follow the instructions below in order to use this code
 11. If you need to make modification to the robot code to allow it to run Offline
     add lines to the checkOfflineExceptions() method
     This method reads lines from the robto code and replaces them to be offline compatible
-12. Update OfflineOpModeLIbs.jav for your path to the RobotVisualization
+# [1/29/21] Updated so there are 2 choices for Offline Code
+ 12. More Tedious Option: OfflineOpModeLIbs.java where you have to copy in the OpMode content
+#   AWESOME OPtion OfflineOpModeRunFile.java - just instantiate the OpMOde you want to run
 
-    Find the line of code "OffLibs.location = computer.KARL;//For Karl on Mac" update this to CALEB OR WILL
-    Find the block of code
+ 13. Update enum for your path to the RobotVisualization - common to both files
+
+    A) for OfflineOpModeLibs: Find the line of code "OffLibs.location = computer.KARL;//For Karl on Mac"
+    update this to CALEB OR WILL
+    B) for OfflineOpModeRunFile: Find the line of code "OffRunFiles.location = computer.KARL;//For Karl on Mac"
+        update this to CALEB OR WILL
+14. Common to both types: Find the block of code
       switch(location) {
                case KARL:
                    fileLocation = "/Users/karl/LocalDocuments/FTC/IntelliJ/RobotVisualization/";
@@ -73,4 +80,48 @@ IMPORTANT - follow the instructions below in order to use this code
                    break;
            }
        Replace the file path by your name with the path to the RobotVisualization project on your machine
+
+15. Running OfflineOpModeRunFile
+    Find Code inputs and loops
+    a) find line 544: int numRings = 0;//Set ring number here to be used for all 4 robots
+    This is the int variable that is changed to set the field configuration
+
+    b) find line 548 that reads for(int h = 1; h<3;h++) {// After creating "Do Nothing" OpModes change to h < 5
+    This is the start of a loop that can run 4 robots worth of OpModes
+    In order to run 4 robots you need 4 OpModes - 2 blue and 2 red.  Of course all robots can run the same OpMode but that just makes a mess
+    Get familiar with this block of code and what needs to changed to implement an OpMode
+
+     Line 550: CompleteAutonomousBlueExterior inputOpMode = new CompleteAutonomousBlueExterior();
+
+     This changes Robot #1 code to run from the instantiated opMode
+     For a new OpMode just replace the "CompleteAutonomousBlueExterior" with the OpMode you want
+
+     c) What's needed in an OpMode to run it here?
+     Find line 584  - this the actual execution of the code
+                 OffRunFiles.robotNumber = h;
+                 OffRunFiles.prepOpMode(numRings);//Prep field with rings
+                 OffRunFiles.autoOpMode.constructRobot();//Construct robot using Phone OpMode Code
+                 OffRunFiles.initOfflineIMU();//Pass robot location into Offline HW
+                 OffRunFiles.autoOpMode.initialize();//Initialize robot  using Phone OpMode Code
+                 OffRunFiles.autoOpMode.runCode();//Run OpMode Code
+     Your OpMode must have these methods
+        constructRobot()
+        initialize()
+        runCode()
+
+     and the BasicAuto class must have the latest updateIMU() method for tracking robot and field locations
+
+     As long as you have these methods these lines of OfflineOpModeRunFile should never need to change
+
+     d) Once the OpModes are instantiated and your path for hte output files have been updated
+
+     Run the File_IO.java from RobotVisualization project to make sure you have the latest Offline OCde
+     Run OfflineOpModeRUnFile main() method with coverage to execute the code and create the output files
+     Update the h < "integer" value in the loop to run 2 or up to 4 robots
+
+ 16. After running the main method Run RobotOnFieldVizMain main() method from the RobotVisualization project
+ This will create the javaFx window to create the robot images
+
+ 17. Change the ring configuration variable and repeat!
+
 
