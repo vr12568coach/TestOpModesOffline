@@ -45,12 +45,12 @@ import UltimateGoal_RobotTeam.HarwareConfig.HardwareRobotMulti;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.BasicAuto;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueExterior;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueInterior;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueExt;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueInt;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedExt;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedInt;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.RedExteriorWobbleHighGoal;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.RedInteriorWobbleHighGoal;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueExt;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueInt;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedExt;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedInt;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.RedExteriorWobbleHighGoal;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.RedInteriorWobbleHighGoal;
 import UltimateGoal_RobotTeam.Utilities.PursuitLines;
 
 //import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -533,9 +533,9 @@ public class OfflineOpModeRunFile extends BasicAuto {
         //Instantiate a static class to run the code with
         OfflineOpModeRunFile OffRunFiles = new OfflineOpModeRunFile();
 
-        OffRunFiles.location = computer.KARL;//For Karl on HP
+//        OffRunFiles.location = computer.KARL;//For Karl on HP
 //  UPDATE SELECTION and PATH for your machine
-//        OffRunFiles.location = computer.MAC;//For Caleb
+        OffRunFiles.location = computer.MAC;//For Caleb
 //        OffRunFiles.location = computer.WILL;//For William
 
 
@@ -565,17 +565,18 @@ public class OfflineOpModeRunFile extends BasicAuto {
             }
             else if (h == 3){// Define robot #3
 //                RedInteriorWobbleHighGoal inputOpMode = new RedInteriorWobbleHighGoal();
-                DoNothingRedInt inputOpMode = new DoNothingRedInt();
-                OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
+//                DoNothingRedInt inputOpMode = new DoNothingRedInt();
+
+//                OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 
                 OffRunFiles.writeRR=true;
                 OffRunFiles.writeRW1=true;
             }
             else if (h == 4){// Define robot #4
 //                RedExteriorWobbleHighGoal inputOpMode = new RedExteriorWobbleHighGoal();
-                DoNothingRedExt inputOpMode = new DoNothingRedExt();
+//                DoNothingRedExt inputOpMode = new DoNothingRedExt();
 
-                OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
+//                OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 
 //                OffRunFiles.writeRR=true;
                 OffRunFiles.writeRW2=true;
