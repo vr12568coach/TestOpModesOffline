@@ -97,7 +97,7 @@ public void updateField(BasicAuto opMode) {
     blueWobble2.setHold(opMode.haveBlueWobble2);
     redWobble1.setHold(opMode.haveRedWobble1);
     redWobble2.setHold(opMode.haveRedWobble2);
-    opMode.telemetry.addLine("--------- Field Configuration ---------");
+//    opMode.telemetry.addLine("--------- Field Configuration ---------");
     if(redRing.heldByRobot){
         redRing = updateGameItem(redRing,opMode.robotUG.driveTrain.imu.robotOnField);
     }
@@ -134,7 +134,7 @@ public void updateField(BasicAuto opMode) {
     RobotPoints.add(new FieldLocation(opMode.robotUG.driveTrain.imu.robotOnField.x,opMode.robotUG.driveTrain.imu.robotOnField.y,opMode.robotUG.driveTrain.imu.robotOnField.theta));// ADDED this to change points for field
 
     NavPoints.add(new FieldLocation(opMode.robotUG.driveTrain.robotFieldLocation.x,opMode.robotUG.driveTrain.robotFieldLocation.y,0));
-    opMode.telemetry.addLine("------------- END -------------");
+//    opMode.telemetry.addLine("------------- END -------------");
     opMode.telemetry.update();
 
 }
@@ -174,7 +174,7 @@ public void updateField(BasicAuto opMode) {
             // robot just grabbed item, set field deltaX & deltaY and angle offset to robot angle
             // use the WGA motor to determine the position for the gripper
             // use the internal position vs. calling a method that will recalculate and move the arm
-            wobble.deltaY = wga.ARM_Y + length;
+            wobble.deltaY = wga.ARM_Y + Math.cos(wga.ARM_INIT_ANGLE_DEG*Math.PI/180.0) * wga.ARM_LENGTH;
             wobble.deltaX = wga.ARM_X;
             wobble.thetaOffset = wobble.theta;
             robot.thetaOffset = robot.theta - wobble.theta;
@@ -197,9 +197,9 @@ public void updateField(BasicAuto opMode) {
             wobble = rotationMatrix(wobble, robot, angleRotate);
 
         }
-        om.telemetry.addData("\t Blue Wobble "," Hold Status: Current = %s, Prior = %s, ",wobble.heldByRobot,wobble.priorHold);
-        om.telemetry.addData("\t Blue Wobble ","X = %.1f, Y = %.1f",wobble.x,wobble.y);
-        om.telemetry.addData("\t Blue Wobble ","Relative Angle = %.1f, Total Angle = %.1f, length= %.1f,",wga.convertArmAngleDegrees(wga.wobbleGoalArm.fakePosition),totalAngle,length);
+//        om.telemetry.addData("\t Wobble "," Hold Status: Current = %s, Prior = %s, ",wobble.heldByRobot,wobble.priorHold);
+//        om.telemetry.addData("\t Wobble ","X = %.1f, Y = %.1f",wobble.x,wobble.y);
+//        om.telemetry.addData("\t Wobble ","Relative Angle = %.1f, Total Angle = %.1f, length= %.1f,",wga.convertArmAngleDegrees(wga.wobbleGoalArm.fakePosition),totalAngle,length);
 
         return  wobble;
     }

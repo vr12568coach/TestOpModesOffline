@@ -110,27 +110,33 @@ public  class BNO055IMU{
         float fake2 = (float) timeStep;
         fakeRate = fake1/fake2;
 
-        robotFLBRCount = 0.707* Math.signum(deltaBR)*(Math.abs(deltaBR-deltaSum) + Math.abs(deltaFL-deltaSum))/2;//
-        robotFRBLCount = 0.707* Math.signum(deltaFR)*(Math.abs(deltaFR-deltaSum) + Math.abs(deltaBL-deltaSum))/2;//
-// removed +=
-
-        if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)!= Math.signum(deltaBL)){
-            factor = 1/params.adjRight;
+        boolean useRobotNav = true;//select which method for IMU to use
+        double robotXInc;
+        double robotYInc;
+        if(useRobotNav){
+            robotXInc = ((-deltaFL + deltaFR + deltaBR - deltaBL)/4)/
+                    (params.DEGREES_TO_COUNTS_40_1 *params.ROBOT_INCH_TO_MOTOR_DEG*params.adjForward); //Hardcoded here to 40:1
+            robotYInc = -((-deltaFL - deltaFR + deltaBR + deltaBL)/4)/
+                    (params.DEGREES_TO_COUNTS_40_1 *params.ROBOT_INCH_TO_MOTOR_DEG*params.adjRight); //Hardcoded here to 40:1
         }
-        else if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)== Math.signum(deltaBL)) {
-            factor = 1 / params.adjRotate;
+        else{
+            robotFLBRCount = 0.707* Math.signum(deltaBR)*(Math.abs(deltaBR-deltaSum) + Math.abs(deltaFL-deltaSum))/2;//
+            robotFRBLCount = 0.707* Math.signum(deltaFR)*(Math.abs(deltaFR-deltaSum) + Math.abs(deltaBL-deltaSum))/2;//
+            if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)!= Math.signum(deltaBL)){
+                factor = 1/params.adjRight;
+            }
+            else if(Math.signum(deltaFL)== Math.signum(deltaFR) && Math.signum(deltaFL)== Math.signum(deltaBL)) {
+                factor = 1 / params.adjRotate;
+            }
+            else {
+                factor = 1;
+            }
+            //Coordinate transformation to take motor drive coordinates to robot body reference frame - fixed 45 deg rotation
+            robotXInc = factor * ((robotFRBLCount*0.707) + (robotFLBRCount*0.707)) /
+                    (params.DEGREES_TO_COUNTS_40_1 *params.ROBOT_INCH_TO_MOTOR_DEG);
+            robotYInc = -factor* ((-robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
+                    (params.DEGREES_TO_COUNTS_40_1 *params.ROBOT_INCH_TO_MOTOR_DEG);
         }
-
-        else {
-
-            factor = 1;
-        }
-//adding +=
-//Coordinate transformation to take motor drive coordinates to robot body reference frame - fixed 45 deg rotation
-        double robotXInc = factor* ((robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
-                (params.DEGREES_TO_COUNTS_40_1 *params.ROBOT_INCH_TO_MOTOR_DEG);
-        double robotYInc = -factor* ((-robotFRBLCount*0.707) + (robotFLBRCount*0.707))/
-                (params.DEGREES_TO_COUNTS_40_1 *params.ROBOT_INCH_TO_MOTOR_DEG);
         robotX += robotXInc;
         robotY += robotYInc;
         robotDist = Math.sqrt(robotX*robotX + robotY*robotY);
