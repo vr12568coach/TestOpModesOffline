@@ -43,6 +43,14 @@ import java.util.Arrays;
 import OfflineCode.Field.FieldConfiguration;
 import UltimateGoal_RobotTeam.HarwareConfig.HardwareRobotMulti;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.BasicAuto;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.BlueExPowerShotAuto;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.BlueInPowerShotAuto;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueInt;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedExt;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedInt;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.MainBlueExAuto;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.MainBlueInAuto;
+
 import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueExterior;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueInterior;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueExt;
@@ -184,9 +192,14 @@ public class OfflineOpModeRunFile extends BasicAuto {
         Arrays.fill(autoOpMode.shooterArray,IMUCounter,(size), autoOpMode.shooterArray[IMUCounter-1]);
         Arrays.fill(autoOpMode.wgaAngleArray,IMUCounter,(size), autoOpMode.wgaAngleArray[IMUCounter-1]);
 
+
         double deltaTime = (timeArray[1] - timeArray[0]);
 //        for(int k = IMUCounter-1; k < size;k++){// needed to reduce counter by 1 -- means there is an extra count somewhere
-        for(int k = IMUCounter+1; k < size;k++){// updated to only add points
+        telemetry.addData("IMU Counters","Main = %d autoOpMode = %d, and size of RobotPoints = %d",IMUCounter,autoOpMode.IMUCounter,autoOpMode.fc.RobotPoints.size());
+        telemetry.addData("List Size","Ring = %d, Wobble Goal = %d, Pursuit = %d, Nav = %d",
+                autoOpMode.fc.BlueRingPoints.size(),autoOpMode.fc.BlueWobble1Points.size(),autoOpMode.fc.PursuitPoints.size(),autoOpMode.fc.NavPoints.size());
+        telemetry.update();
+        for(int k = IMUCounter; k < size;k++){// updated to only add points
             timeArray[k] = timeArray[k-1] + deltaTime;
             autoOpMode.fc.RobotPoints.add(autoOpMode.fc.RobotPoints.get(k-1));
 
@@ -533,9 +546,9 @@ public class OfflineOpModeRunFile extends BasicAuto {
         //Instantiate a static class to run the code with
         OfflineOpModeRunFile OffRunFiles = new OfflineOpModeRunFile();
 
-//        OffRunFiles.location = computer.KARL;//For Karl on HP
+        OffRunFiles.location = computer.KARL;//For Karl on HP
 //  UPDATE SELECTION and PATH for your machine
-        OffRunFiles.location = computer.MAC;//For Caleb
+//        OffRunFiles.location = computer.MAC;//For Caleb
 //        OffRunFiles.location = computer.WILL;//For William
 
 
@@ -547,16 +560,18 @@ public class OfflineOpModeRunFile extends BasicAuto {
 
         for(int h = 1; h<3;h++) {// After creating "Do Nothing" OpModes change to h < 5
             if(h == 1){// Define robot #1
-                CompleteAutonomousBlueExterior inputOpMode = new CompleteAutonomousBlueExterior();
-//                DoNothingBlueExt inputOpMode = new DoNothingBlueExt();
+//                CompleteAutonomousBlueExterior inputOpMode = new CompleteAutonomousBlueExterior();
+//                BlueExPowerShotAuto inputOpMode = new BlueExPowerShotAuto();
+                MainBlueExAuto inputOpMode = new MainBlueExAuto();
                 OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 
                 OffRunFiles.writeBR=true;
                 OffRunFiles.writeBW1=true;
             }
             else if (h == 2){// Define robot #2
-                CompleteAutonomousBlueInterior inputOpMode = new CompleteAutonomousBlueInterior();
-//                DoNothingBlueInt inputOpMode = new DoNothingBlueInt();
+//                CompleteAutonomousBlueInterior inputOpMode = new CompleteAutonomousBlueInterior();
+//                BlueInPowerShotAuto inputOpMode = new BlueInPowerShotAuto();
+                DoNothingBlueInt inputOpMode = new DoNothingBlueInt();
 
                 OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 

@@ -168,8 +168,7 @@ public void updateField(BasicAuto opMode) {
         return  field;
     }
     private FieldLocation updateWobbleGoal(FieldLocation wobble, FieldLocation robot, WobbleArm wga, BasicAuto om){
-//        double totalAngle = 180.0 - 0.7*wga.convertArmAngleDegrees(wga.wobbleGoalArm.fakePosition)+wga.ARM_INIT_ANGLE_DEG;// Reloacted arm to front left and arm starts agled back
-        double totalAngle = 180.0 - wga.convertArmAngleDegrees(wga.wobbleGoalArm.fakePosition)+wga.ARM_INIT_ANGLE_DEG;// Relocated arm to front left and arm starts agled back
+        double totalAngle = 180.0 - wga.convertArmAngleDegrees(wga.wobbleGoalArm.fakePosition)-wga.ARM_INIT_ANGLE_DEG;// Relocated arm to front left and arm starts angled back
 
         double length = Math.cos(totalAngle*Math.PI/180.0) * wga.ARM_LENGTH;
         if (wobble.heldByRobot && !wobble.priorHold){
