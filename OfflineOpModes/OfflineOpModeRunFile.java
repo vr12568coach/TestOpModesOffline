@@ -59,6 +59,8 @@ import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueInterior;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedInt;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.RedExteriorWobbleHighGoal;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.RedInteriorWobbleHighGoal;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.RedExteriorWobbleHighGoal;
+import UltimateGoal_RobotTeam.OpModes.Autonomous.RedInteriorWobbleHighGoal;
 import UltimateGoal_RobotTeam.Utilities.PursuitLines;
 
 //import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -70,71 +72,25 @@ import UltimateGoal_RobotTeam.Utilities.PursuitLines;
 public class OfflineOpModeRunFile extends BasicAuto {
 
 //****************************************
-//DECLARE VARIABLES FROM CODE BEING TESTED
-//****************************************
-
-//****************************************
 // DECLARE VARIABLES NEEDED FOR TEST CODE
 //****************************************
-    //********** REMOVED from OfflineOpMode files to BasicAuto for OfflineOpModeRunFile ******************
-
-//    private FieldConfiguration fc = new FieldConfiguration();
-//
-//    boolean writeBR = false;
-//    boolean writeRR = false;
-//    boolean writeBW1 = false;
-//    boolean writeBW2 = false;
-//    boolean writeRW1 = false;
-//    boolean writeRW2 = false;
-//    boolean robotSeeRing = false;
-//    int IMUCounter =0;
-    final static int size = 300;
-    //********** REMOVED from OfflineOpMode files to BasicAuto for OfflineOpModeRunFile ******************
-
+    //Define the size of the arrays and number of points that are allowed to run
+    static int runPoints =300;//'size' is defined in BasicAuto for overall Array size as 3000 to be much larger than runPoints needs to be
+    //Define the points per second that will be passed to the Robot Visualization
+    static int pointsPerSecond = 10;
+    //Define based on calculation the end time in seconds for the simulation
+    static double tEnd = (double)runPoints/(double)pointsPerSecond;
     private int robotNumber = 1;
 
 //Instantiate the Autonomous OpMode you wish to Run - can be multiple for each of 4 robots
 // Below being used as the surrogate robot so multiple autonomous OpModes can be contained in a single run
   public BasicAuto autoOpMode = new BasicAuto();// Needed for Offline Code
 
-    /* DON'T NEED TO INSTANTIATE THE OPMODES HERE, DONE WHEN RUNNING */
-//    CompleteAutonomousBlueExterior BlueExt = new CompleteAutonomousBlueExterior();
-//    CompleteAutonomousBlueInterior BlueInt = new CompleteAutonomousBlueInterior();//Needs to be updated before use
-    /* CREATE RED OpModes for Future */
-
-    // Finish instantiations
 
     int counter;
-    int[] flCounts = new int[size];
-    int[] frCounts = new int[size];
-    int[] brCounts = new int[size];
-    int[] blCounts = new int[size];
-    int[] flIMU = new int[size];
-    int[] frIMU = new int[size];
-    int[] brIMU = new int[size];
-    int[] blIMU = new int[size];
 
-//    int[] collectorArray = new int[size];
-//    int[] conveyorArray = new int[size];
-//    int[] shooterArray = new int[size];
-//    double[] wgaAngleArray = new double[size];
-
-    double[] arrayRobotX = new double[size];
-    double[] arrayRobotY= new double[size];
-    double[] arrayRobotDist = new double[size];
-    double[] arrayRobotAngle = new double[size];
-
-    public double[] arrayFLBR=new double[size];
-    public double[] arrayFRBL=new double[size];
-
-    double[] arrayFieldX = new double[size];
-    double[] arrayFieldY= new double[size];
-    double[] arrayFieldDist = new double[size];
-
-    double[] timeArray= new double[size];
     public double timeStep = 135;//determined a fixed time step (in milliseconds) so that faster speeds will show shorter time to distance
     /* Moved time step to BasicOpMode */
-
 
 
     static FileReader in = null;
@@ -166,41 +122,21 @@ public class OfflineOpModeRunFile extends BasicAuto {
     public void extractArrayData(){
 
 
-        flIMU = autoOpMode.robotUG.driveTrain.imu.flArray;
-        frIMU = autoOpMode.robotUG.driveTrain.imu.frArray;
-        brIMU = autoOpMode.robotUG.driveTrain.imu.brArray;
-        blIMU = autoOpMode.robotUG.driveTrain.imu.blArray;
-
-        timeArray = autoOpMode.robotUG.driveTrain.imu.timeArray;
-
-        arrayRobotX = autoOpMode.robotUG.driveTrain.imu.robotXArray;
-        arrayRobotY = autoOpMode.robotUG.driveTrain.imu.robotYArray;
-        arrayRobotDist = autoOpMode.robotUG.driveTrain.imu.robotDistArray;
-        arrayRobotAngle = autoOpMode.robotUG.driveTrain.imu.robotAngleArray;
         IMUCounter = autoOpMode.robotUG.driveTrain.imu.counter;
 
-        arrayFLBR = autoOpMode.robotUG.driveTrain.imu.FLBRArray;
-        arrayFRBL = autoOpMode.robotUG.driveTrain.imu.FRBLArray;
-
-
-        Arrays.fill(arrayRobotDist,IMUCounter,(size),arrayRobotDist[IMUCounter-1]);
-        Arrays.fill(arrayRobotAngle,IMUCounter,(size),arrayRobotAngle[IMUCounter-1]);
-
-        Arrays.fill(arrayFieldDist,IMUCounter,(size),arrayFieldDist[IMUCounter-1]);
-        Arrays.fill(autoOpMode.collectorArray,IMUCounter,(size), autoOpMode.collectorArray[IMUCounter-1]);
-        Arrays.fill(autoOpMode.conveyorArray,IMUCounter,(size), autoOpMode.conveyorArray[IMUCounter-1]);
-        Arrays.fill(autoOpMode.shooterArray,IMUCounter,(size), autoOpMode.shooterArray[IMUCounter-1]);
-        Arrays.fill(autoOpMode.wgaAngleArray,IMUCounter,(size), autoOpMode.wgaAngleArray[IMUCounter-1]);
-
-
-        double deltaTime = (timeArray[1] - timeArray[0]);
-//        for(int k = IMUCounter-1; k < size;k++){// needed to reduce counter by 1 -- means there is an extra count somewhere
         telemetry.addData("IMU Counters","Main = %d autoOpMode = %d, and size of RobotPoints = %d",IMUCounter,autoOpMode.IMUCounter,autoOpMode.fc.RobotPoints.size());
         telemetry.addData("List Size","Ring = %d, Wobble Goal = %d, Pursuit = %d, Nav = %d",
                 autoOpMode.fc.BlueRingPoints.size(),autoOpMode.fc.BlueWobble1Points.size(),autoOpMode.fc.PursuitPoints.size(),autoOpMode.fc.NavPoints.size());
+        telemetry.addData("Array Size"," collectorArray = %d, WGA = %d,",
+                autoOpMode.collectorArray.length,autoOpMode.wgaAngleArray.length);
         telemetry.update();
-        for(int k = IMUCounter; k < size;k++){// updated to only add points
-            timeArray[k] = timeArray[k-1] + deltaTime;
+
+        Arrays.fill(autoOpMode.collectorArray,IMUCounter,(runPoints-1), autoOpMode.collectorArray[IMUCounter-1]);
+        Arrays.fill(autoOpMode.conveyorArray,IMUCounter,(runPoints-1), autoOpMode.conveyorArray[IMUCounter-1]);
+        Arrays.fill(autoOpMode.shooterArray,IMUCounter,(runPoints-1), autoOpMode.shooterArray[IMUCounter-1]);
+        Arrays.fill(autoOpMode.wgaAngleArray,IMUCounter,(runPoints-1), autoOpMode.wgaAngleArray[IMUCounter-1]);
+
+        for(int k = IMUCounter; k < runPoints;k++){// updated to only add points
             autoOpMode.fc.RobotPoints.add(autoOpMode.fc.RobotPoints.get(k-1));
 
             autoOpMode.fc.BlueRingPoints.add(autoOpMode.fc.BlueRingPoints.get(k-1));
@@ -222,7 +158,7 @@ public class OfflineOpModeRunFile extends BasicAuto {
     // TEST MODE CODE ONLY - WRITES DATA TO FILE
     //----------------------------------------------------------------------------------------------
     public void writeExtrasToFile(FileOutputStream fos){
-        int countVar = Math.max(size, IMUCounter);
+        int countVar = Math.max(runPoints, IMUCounter);
 
 
         try {
@@ -231,7 +167,9 @@ public class OfflineOpModeRunFile extends BasicAuto {
 
 //          Write the data in text format that can be read back in by the Java visualization programs in IntelliJ
 //          Only writing out the power or position as formatted for reading in, Used for accessory parts that are always attached to robot
-            for (int j = 0; j < size; j++) {
+            osw.write("Collector(On/Off)\tConveyor(On/Off)\tShooter(On/Off)\tWGA_Angle(rad.)\n"); // Header Row
+
+            for (int j = 0; j < runPoints; j++) {
                 // writes the data as text for each value in the array
                 osw.write(Integer.toString(autoOpMode.collectorArray[j])+"\t");   // collector Power - use to determine if ON
                 osw.write(Integer.toString(autoOpMode.conveyorArray[j])+"\t");   // conveyor Power - use to determine if ON
@@ -251,8 +189,31 @@ public class OfflineOpModeRunFile extends BasicAuto {
 
 
     }
+    public void writeMetaData(FileOutputStream fos){
 
-    public void writePath(FileOutputStream fos, ArrayList<PursuitLines> lines, int size){
+        try {
+
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+
+//          Write the data in text format that can be read back in by the Java visualization programs in IntelliJ
+//          Only writing out certain variables that were used to set the number of points in the run or number of points per second
+            osw.write(Integer.toString(runPoints)+"\t");   // total number of points
+            osw.write(Integer.toString(pointsPerSecond)+"\n");   // points per second
+
+            if(osw != null){
+                osw.flush();
+                osw.close();
+            }
+
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            System.out.println(String.format("Error occurred","%S",e));
+        }
+
+
+    }
+    public void writePath(FileOutputStream fos, ArrayList<PursuitLines> lines, int numPoints){
 
         try {
 
@@ -262,7 +223,7 @@ public class OfflineOpModeRunFile extends BasicAuto {
 //          Only writing out the FieldLocation X,Y, Theta as formatted for reading in, Used for foundations,stones, robot, and gripper
             osw.write("X1 (in.)"+"\t"+"Y1 (in.)"+"\t"+"X2 (in.)"+"\t"+"Y2 (in.)"+"\n"); // Header Row
 
-            for (int j = 0; j < size; j++) {
+            for (int j = 0; j < numPoints; j++) {
                 // writes the bytes for each double in the array
                 osw.write(Double.toString(lines.get(j).x1)+"\t"); // Path X1 position on field in inches
                 osw.write(Double.toString(lines.get(j).y1)+"\t");   // Path Y1 position on field in inches
@@ -281,63 +242,6 @@ public class OfflineOpModeRunFile extends BasicAuto {
         }
 
     }
-
-
-    //----------------------------------------------------------------------------------------------
-    // TEST MODE CODE ONLY - UPDATES FAKE IMU
-    //----------------------------------------------------------------------------------------------
-//    @Override
-//    public void updateIMU(){
-//        //Moved this method content to BasicopMode so that it is inherited in all BasicOpModes
-//        //Otherwise the OpModes run the blank BasicOpMode code
-//        if(testModeActive) {
-//            autoOpMode.robotUG.driveTrain.imu.flCnt = autoOpMode.robotUG.driveTrain.frontLeft.getCurrentPosition();
-//            autoOpMode.robotUG.driveTrain.imu.frCnt = autoOpMode.robotUG.driveTrain.frontRight.getCurrentPosition();
-//            autoOpMode.robotUG.driveTrain.imu.brCnt = autoOpMode.robotUG.driveTrain.backRight.getCurrentPosition();
-//            autoOpMode.robotUG.driveTrain.imu.blCnt = autoOpMode.robotUG.driveTrain.backLeft.getCurrentPosition();
-//
-//            IMUCounter = autoOpMode.robotUG.driveTrain.imu.counter;
-//
-//            collectorArray[IMUCounter] = (int) Math.round(robotUG.collector.collectorPower);
-//            conveyorArray[IMUCounter] = (int) Math.round(robotUG.conveyor.conveyor_Power);
-//            shooterArray[IMUCounter] = (int) Math.round(robotUG.shooter.getShooter_Power());
-//            wgaAngleArray[IMUCounter] = robotUG.wobbleArm.getArmAngleDegrees() * Math.PI / 180.0;
-//
-//            fc.updateField(this);
-//            robotSeeRing = fc.ringFound;
-//
-//
-//            if (autoOpMode.haveBlueRing) {
-//                writeBR = true;
-//            }
-//            if (autoOpMode.haveRedRing) {
-//                writeRR = true;
-//            }
-//            if (autoOpMode.haveBlueWobble1) {
-//                writeBW1 = true;
-//            }
-//            if (autoOpMode.haveBlueWobble2) {
-//                writeBW2 = true;
-//            }
-//            if (autoOpMode.haveRedWobble1) {
-//                writeRW1 = true;
-//            }
-//            if (autoOpMode.haveRedWobble2) {
-//                writeRW2 = true;
-//            }
-//
-//            try {
-////
-//                if (IMUCounter >= size) {
-//                    int a = 1 / 0;
-//                }
-//            } catch (ArithmeticException e) {
-//                System.out.println(String.format("Exceeded %d counter steps", size));
-//                System.out.println(String.format("IMU Counter = %d", IMUCounter));
-//            }
-//        }
-//
-//    }
 
     //----------------------------------------------------------------------------------------------
     // TEST MODE METHOD prepOpMode is used to initialize offline items - instead of initOpMode
@@ -384,46 +288,6 @@ public class OfflineOpModeRunFile extends BasicAuto {
 
        //************* ABOVE IS TEST CODE ********************************
 
-//       // --------- INVESTIGATE MOVING SOME CODE TO INITIALIZE METHOD TO USE ACTUAL OpMode CODE ------
-//       // %%%%%% UPDATED BELOW FOR HardwareRobotMulti class %%%%%%%%%
-//
-//       // configure the robot needed - for this demo only need DriveTrain
-//       // configArray has True or False values for each subsystem HW element
-//       //
-//       /** configArray is arranged as
-//        * [0] = DriveTrain
-//        * [1] = Shooter
-//        * [2] = Conveyor
-//        * [3] = WobbleArm
-//        * [4] = Collector
-//        * [5] = ImageRecog
-//        * items that are 1 = true will be configured to the robot
-//        */
-//       // HW ELEMENTS *****************    DriveTrain  Shooter  Conveyor	WobbleArm	Collector	ImageRecog
-//       boolean[] configArray = new boolean[]{ true, 	true, 	true, 		true, 		true,		false};
-//       /* DON'T START ImageRecog Offline -- Need to troubleshoot */
-//       // READ HASHMAP FILE OFFLINE
-//       readOrWriteHashMapOffline();
-//
-//       autoOpMode.robotUG = new HardwareRobotMulti(this, configArray,autoOpMode.testModeActive);
-//
-//       // Update telemetry to tell driver than robot is ready
-//       telemetry.addData("STATUS", "MultiRobot Hardware Configured!!");
-//
-//       telemetry.addData("Robot Field Location", "X = %.2f inch, Y = %.2f inch, Theta = %.2f degrees",
-//               autoOpMode.robotUG.driveTrain.robotFieldLocation.x, autoOpMode.robotUG.driveTrain.robotFieldLocation.y, autoOpMode.robotUG.driveTrain.robotFieldLocation.theta);
-//       telemetry.addLine(" ");
-//       telemetry.addLine("*********************************************");
-//       telemetry.addData("WARNING", "VERIFY THAT DRIVE POWER LIMIT IS LOW FOR INITIAL TESTS");
-//       telemetry.addLine("*********************************************");
-//       telemetry.addLine(" ");
-//       telemetry.addData(">", "Press Play to start");
-//       telemetry.update();
-//       telemetry.setAutoClear(true);//revert back to telemetry.update clearing prior display
-//       //***********************************************************
-//       //Code that needs to be Kept in init to initialize functions
-//       //***********************************************************
-
 //       MOVED timeStep to constructors on HW items for test mode
 
        autoOpMode.fc.RedRingPoints.clear();
@@ -438,88 +302,6 @@ public class OfflineOpModeRunFile extends BasicAuto {
        shooterArray= new int[size];
        wgaAngleArray= new double[size];
 
-//       autoOpMode.fc.updateField(autoOpMode);
-
-
-
-//
-//       if(robotNumber == 1) {
-//           autoOpMode.cons.DRIVE_POWER_LIMIT = 1.0;
-//           autoOpMode.robotUG.driveTrain.frontLeft.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.frontRight.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.backRight.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.backLeft.motorTol=1.0;
-//           //field angle orientation is + = CCW , while robot frame is + = CW
-////           robotUG.driveTrain.robotFieldLocation.setLocation(-36,-63,90);// FROM CompleteAutonomous
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.x = -36;//initial x position on field in inches
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.y = -63;//initial y position on field in inches
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.theta = 90;//initial robot angle orientation on field in degrees from EAST CCW +
-//           autoOpMode.robotUG.driveTrain.imu.priorAngle = autoOpMode.robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST CCW +
-//           autoOpMode.robotUG.driveTrain.imu.fakeAngle = (float) autoOpMode.robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST CCW +
-//           autoOpMode.robotUG.driveTrain.robotHeading = -autoOpMode.robotUG.driveTrain.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST, CW +
-//
-//           autoOpMode.robotUG.driveTrain.robotFieldLocation = autoOpMode.robotUG.driveTrain.imu.robotOnField;
-//       }
-//
-//       if(robotNumber == 2) {
-//           //           autoOpMode.cons.DRIVE_POWER_LIMIT = 0.75;
-//           autoOpMode.robotUG.driveTrain.frontLeft.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.frontRight.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.backRight.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.backLeft.motorTol=1.0;
-//           //field angle orientation is + = CCW , while robot frame is + = CW
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.x = -48;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.y = -60;//initial y position on field in inches (WAS 48)
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.theta = 45;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
-//           autoOpMode.robotUG.driveTrain.imu.priorAngle = autoOpMode.robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
-//           autoOpMode.robotUG.driveTrain.imu.fakeAngle = (float) autoOpMode.robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST (WAS 180 for backing to foundation)
-//           autoOpMode.robotUG.driveTrain.robotHeading = -autoOpMode.robotUG.driveTrain.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
-//
-//           autoOpMode.robotUG.driveTrain.robotFieldLocation = autoOpMode.robotUG.driveTrain.imu.robotOnField;
-//       }
-//
-//       if(robotNumber == 3) {
-//           //           autoOpMode.cons.DRIVE_POWER_LIMIT = 0.75;
-//           autoOpMode.robotUG.driveTrain.frontLeft.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.frontRight.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.backRight.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.backLeft.motorTol=1.0;
-//           //field angle orientation is + = CCW , while robot frame is + = CW
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.x = 24;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.y = -60;//initial y position on field in inches
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.theta = 135;//initial robot angle orientation on field in degrees from EAST
-//           autoOpMode.robotUG.driveTrain.imu.priorAngle = autoOpMode.robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST
-//           autoOpMode.robotUG.driveTrain.imu.fakeAngle = (float) autoOpMode.robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST
-//           autoOpMode.robotUG.driveTrain.robotHeading = -autoOpMode.robotUG.driveTrain.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
-//
-//           autoOpMode.robotUG.driveTrain.robotFieldLocation = autoOpMode.robotUG.driveTrain.imu.robotOnField;
-//
-//       }
-//
-//       if(robotNumber == 4) {
-//           //           autoOpMode.cons.DRIVE_POWER_LIMIT = 0.75;
-//           autoOpMode.robotUG.driveTrain.frontLeft.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.frontRight.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.backRight.motorTol=1.0;
-//           autoOpMode.robotUG.driveTrain.backLeft.motorTol=1.0;
-//           //field angle orientation is + = CCW , while robot frame is + = CW
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.x = 48;//initial x position on field in inches (Added 2 inches for robot 7" to wheel center vs. 9")
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.y = -60;//initial y position on field in inches
-//           autoOpMode.robotUG.driveTrain.imu.robotOnField.theta = 45;//initial robot angle orientation on field in degrees from EAST
-//           autoOpMode.robotUG.driveTrain.imu.priorAngle = autoOpMode.robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST
-//           autoOpMode.robotUG.driveTrain.imu.fakeAngle = (float) autoOpMode.robotUG.driveTrain.imu.robotOnField.theta;//initial robot angle orientation on field in degrees from EAST
-//           autoOpMode.robotUG.driveTrain.robotHeading = -autoOpMode.robotUG.driveTrain.imu.fakeAngle;//initial robot angle orientation on field in degrees from EAST
-//
-//           autoOpMode.robotUG.driveTrain.robotFieldLocation = autoOpMode.robotUG.driveTrain.imu.robotOnField;
-//       }
-//
-//       autoOpMode.robotUG.driveTrain.initIMUtoAngle(-autoOpMode.robotUG.driveTrain.robotFieldLocation.theta);//ADDED HERE FOR OFFLINE, NEEDS TO BE IN initialize() method in OpMode
-//       telemetry.addData("Robot Number ", "%d",robotNumber);
-//       telemetry.addData("drivePowerLimit ", "%.2f",autoOpMode.cons.DRIVE_POWER_LIMIT);
-//       telemetry.addData("Robot Field Location", "X = %.2f inch, Y = %.2f inch, Theta = %.2f degrees",
-//               autoOpMode.robotUG.driveTrain.robotFieldLocation.x, autoOpMode.robotUG.driveTrain.robotFieldLocation.y, autoOpMode.robotUG.driveTrain.robotFieldLocation.theta);
-//       telemetry.update();
-//       autoOpMode.fc.updateField(autoOpMode);
 
    }
 
@@ -552,10 +334,14 @@ public class OfflineOpModeRunFile extends BasicAuto {
 //        OffRunFiles.location = computer.WILL;//For William
 
 
-        // ********** SELECT THE OpMode ************************
 
-        int numRings = 0;//Set ring number here to be used for all 4 robots
+        // ********** SET RUN CONDITION & SELECT THE OPMODE ************************
 
+        int numRings = 1;//Set ring number here to be used for all 4 robots
+
+        runPoints = 350;//Define the number of points to capture
+        pointsPerSecond = 10; //Define the points per second that will be passed to the Robot Visualization
+        tEnd = (double)runPoints/(double)pointsPerSecond;//Define based on calculation the end time in seconds for the simulation
         // Set the initial conditions for EACH ROBOT
 
         for(int h = 1; h<3;h++) {// After creating "Do Nothing" OpModes change to h < 5
@@ -565,8 +351,8 @@ public class OfflineOpModeRunFile extends BasicAuto {
                 MainBlueExAuto inputOpMode = new MainBlueExAuto();
                 OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 
-                OffRunFiles.writeBR=true;
-                OffRunFiles.writeBW1=true;
+                OffRunFiles.autoOpMode.writeBR=true;
+                OffRunFiles.autoOpMode.writeBW1=true;
             }
             else if (h == 2){// Define robot #2
 //                CompleteAutonomousBlueInterior inputOpMode = new CompleteAutonomousBlueInterior();
@@ -575,8 +361,8 @@ public class OfflineOpModeRunFile extends BasicAuto {
 
                 OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 
-//                OffRunFiles.writeBR=true;
-                OffRunFiles.writeBW2=true;
+//                OffRunFiles.autoOpMode.writeBR=true;
+                OffRunFiles.autoOpMode.writeBW2=true;
             }
             else if (h == 3){// Define robot #3
 //                RedInteriorWobbleHighGoal inputOpMode = new RedInteriorWobbleHighGoal();
@@ -584,8 +370,8 @@ public class OfflineOpModeRunFile extends BasicAuto {
 
 //                OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 
-                OffRunFiles.writeRR=true;
-                OffRunFiles.writeRW1=true;
+                OffRunFiles.autoOpMode.writeRR=true;
+                OffRunFiles.autoOpMode.writeRW1=true;
             }
             else if (h == 4){// Define robot #4
 //                RedExteriorWobbleHighGoal inputOpMode = new RedExteriorWobbleHighGoal();
@@ -593,10 +379,11 @@ public class OfflineOpModeRunFile extends BasicAuto {
 
 //                OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 
-//                OffRunFiles.writeRR=true;
-                OffRunFiles.writeRW2=true;
+//                OffRunFiles.autoOpMode.writeRR=true;
+                OffRunFiles.autoOpMode.writeRW2=true;
             }
         // Run the code
+
             OffRunFiles.robotNumber = h;
             OffRunFiles.prepOpMode(numRings);//Prep field with rings
             OffRunFiles.autoOpMode.constructRobot();//Construct robot using Phone OpMode Code
@@ -606,10 +393,10 @@ public class OfflineOpModeRunFile extends BasicAuto {
 
 // Lines below are to capture the array data and output
             OffRunFiles.extractArrayData();
-//            int countVar = Math.max(size, OffRunFiles.IMUCounter);
+//            int countVar = Math.max(runPoints, OffRunFiles.IMUCounter);
 
             fos = new FileOutputStream(OffRunFiles.fileLocation + String.format("Robot%dOnField.txt", OffRunFiles.robotNumber));// Path to directory for IntelliJ code
-            OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.RobotPoints, size);
+            OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.RobotPoints, runPoints);
 
             fos = new FileOutputStream(OffRunFiles.fileLocation + String.format("Robot%dAccessories.txt", OffRunFiles.robotNumber));// Path to directory for IntelliJ code
             OffRunFiles.writeExtrasToFile(fos);
@@ -618,38 +405,40 @@ public class OfflineOpModeRunFile extends BasicAuto {
             OffRunFiles.writePath(fos, OffRunFiles.autoOpMode.lines, OffRunFiles.autoOpMode.lines.size());
 
             fos = new FileOutputStream(OffRunFiles.fileLocation + String.format("Robot%dPursuit.txt", OffRunFiles.robotNumber));// Path to directory for IntelliJ code
-            OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.PursuitPoints, size);
+            OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.PursuitPoints, runPoints);
             fos = new FileOutputStream(OffRunFiles.fileLocation + String.format("Robot%dNav.txt", OffRunFiles.robotNumber));// Path to directory for IntelliJ code
-            OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.NavPoints, size);
+            OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.NavPoints, runPoints);
 
             if (OffRunFiles.autoOpMode.writeRR) {
                 fos = new FileOutputStream(fileLocation + "RedRing.txt");// Path to directory for IntelliJ code
-                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.RedRingPoints, size);
+                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.RedRingPoints, runPoints);
                 fos = new FileOutputStream(fileLocation + "RingSet.txt");// Path to directory for IntelliJ code
                 OffRunFiles.fc.writeRingType(fos);
 
             }
             if (OffRunFiles.autoOpMode.writeBR) {
                 fos = new FileOutputStream(fileLocation + "BlueRing.txt");// Path to directory for IntelliJ code
-                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.BlueRingPoints, size);
+                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.BlueRingPoints, runPoints);
+                OffRunFiles.telemetry.addData("Sizes"," points: %d, array: %d",runPoints,OffRunFiles.size);
+                OffRunFiles.telemetry.update();
                 fos = new FileOutputStream(fileLocation + "RingSet.txt");// Path to directory for IntelliJ code
                 OffRunFiles.fc.writeRingType(fos);
             }
             if (OffRunFiles.autoOpMode.writeRW1) {
                 fos = new FileOutputStream(fileLocation + "RedWobble1.txt");// Path to directory for IntelliJ code
-                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.RedWobble1Points, size);
+                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.RedWobble1Points, runPoints);
             }
             if (OffRunFiles.autoOpMode.writeRW2){
                 fos = new FileOutputStream(fileLocation + "RedWobble2.txt");// Path to directory for IntelliJ code
-                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.RedWobble2Points, size);
+                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.RedWobble2Points, runPoints);
             }
             if (OffRunFiles.autoOpMode.writeBW1 ) {
                 fos = new FileOutputStream(fileLocation + "BlueWobble1.txt");// Path to directory for IntelliJ code
-                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.BlueWobble1Points, size);
+                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.BlueWobble1Points, runPoints);
             }
             if ( OffRunFiles.autoOpMode.writeBW2){
                 fos = new FileOutputStream(fileLocation + "BlueWobble2.txt");// Path to directory for IntelliJ code
-                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.BlueWobble2Points, size);
+                OffRunFiles.fc.writeFieldAsText(fos, OffRunFiles.autoOpMode.fc.BlueWobble2Points, runPoints);
             }
 
             OffRunFiles.telemetry.addData("Total Number of Time Steps", "%d", OffRunFiles.IMUCounter);
@@ -659,6 +448,15 @@ public class OfflineOpModeRunFile extends BasicAuto {
             OffRunFiles.telemetry.update();
 
         }
+        //Write out the basic timing MetaData to the screen and file
+        OffRunFiles.telemetry.addLine(" ");
+        OffRunFiles.telemetry.addData("Meta Data","Points: %d, End Time: %.2f, Points/Second: %d",runPoints,tEnd,pointsPerSecond);
+        OffRunFiles.telemetry.addData("File Location"," %s",OffRunFiles.fileLocation);
+        OffRunFiles.telemetry.addLine("===================================");
+        OffRunFiles.telemetry.addLine(" ");
+        OffRunFiles.telemetry.update();
+        fos = new FileOutputStream(OffRunFiles.fileLocation + "RunMetaData.txt");// Path to directory for IntelliJ code and filename
+        OffRunFiles.writeMetaData(fos);
     }
 
 }

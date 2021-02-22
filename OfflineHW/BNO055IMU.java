@@ -32,9 +32,11 @@ public  class BNO055IMU{
     public int brCnt=0;
     public int blCnt=0;
     public int wgaCnt =0;
-    public double blueStoneServoPos=0;
-    public double redStoneServoPos =0;
 
+    public int flPrev=0;
+    public int frPrev=0;
+    public int brPrev=0;
+    public int blPrev=0;
 
     public double robotFRBLCount = 0;
     public double robotFLBRCount = 0;
@@ -42,8 +44,7 @@ public  class BNO055IMU{
     public double robotX=0;
     public double robotY=0;
     public double robotDist=0;
-//    public double fieldX=0;
-//    public double fieldY=0;
+
     public double fieldDist=0;
 
     public FieldLocation robotOnField = new FieldLocation(0,0,0);
@@ -52,25 +53,9 @@ public  class BNO055IMU{
     public Orientation IMUangles = new Orientation(AxesReference.INTRINSIC, AxesOrder.ZYX, org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES, 100, 100, 100, 1);
     public AngularVelocity IMURate = new AngularVelocity(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES, 0, 0, 0, 1);
     public double priorAngle=0;
-    public double timeValue=0;
-    public int size = 300;
-    public double timeStep = 100;
 
-    public double[] timeArray =new double[size];
-    public int[] flArray=new int[size];
-    public int[] frArray=new int[size];
-    public int[] brArray=new int[size];
-    public int[] blArray=new int[size];
+    public double timeStep = 135;
 
-    public double[] FLBRArray=new double[size];
-    public double[] FRBLArray=new double[size];
-
-    public double[] robotXArray=new double[size];
-    public double[] robotYArray=new double[size];
-    public double[] robotDistArray=new double[size];
-    public double[] robotAngleArray=new double[size];
-
-    public double[] fieldDistArray=new double[size];
 
     public ArrayList<FieldLocation> RobotPoints =new ArrayList();
 
@@ -89,10 +74,10 @@ public  class BNO055IMU{
      * @return
      */
     public Orientation getAngularOrientation(AxesReference reference, AxesOrder order, org.firstinspires.ftc.robotcore.external.navigation.AngleUnit angleUnit){
-        int deltaFL = flCnt - flArray[counter-1];
-        int deltaFR = frCnt - frArray[counter-1];
-        int deltaBR = brCnt - brArray[counter-1];
-        int deltaBL = blCnt - blArray[counter-1];
+        int deltaFL = flCnt - flPrev;
+        int deltaFR = frCnt - frPrev;
+        int deltaBR = brCnt - brPrev;
+        int deltaBL = blCnt - blPrev;
 
 
         //drive motor calculations
@@ -159,23 +144,10 @@ public  class BNO055IMU{
         IMUangles.secondAngle = 0;
         IMUangles.thirdAngle = 0;
 
-        timeValue+=timeStep;
-        timeArray[counter] = timeValue/1000;
-
-        flArray[counter] = flCnt;
-        frArray[counter] = frCnt;
-        brArray[counter] = brCnt;
-        blArray[counter] = blCnt;
-
-        FLBRArray[counter] = robotFLBRCount;
-        FRBLArray[counter] = robotFRBLCount;
-
-        robotXArray[counter] = robotX;
-        robotYArray[counter] = robotY;
-        robotDistArray[counter] = robotDist;
-        robotAngleArray[counter] =  IMUangles.firstAngle;//use IMU + = CCW convention for visualization
-
-        fieldDistArray[counter] = fieldDist;
+        flPrev= flCnt;
+        frPrev = frCnt;
+        brPrev = brCnt;
+        blPrev = blCnt;
 
         RobotPoints.add(new FieldLocation(robotOnField.x,robotOnField.y,robotOnField.theta));
 

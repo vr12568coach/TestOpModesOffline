@@ -153,35 +153,35 @@ public class OfflineOpModeLibs extends BasicAuto {
     public void extractArrayData(){
 
 
-        flIMU = robotUG.driveTrain.imu.flArray;
-        frIMU = robotUG.driveTrain.imu.frArray;
-        brIMU = robotUG.driveTrain.imu.brArray;
-        blIMU = robotUG.driveTrain.imu.blArray;
+//        flIMU = robotUG.driveTrain.imu.flArray;
+//        frIMU = robotUG.driveTrain.imu.frArray;
+//        brIMU = robotUG.driveTrain.imu.brArray;
+//        blIMU = robotUG.driveTrain.imu.blArray;
+//
+//        timeArray = robotUG.driveTrain.imu.timeArray;
+//
+//        arrayRobotX = robotUG.driveTrain.imu.robotXArray;
+//        arrayRobotY = robotUG.driveTrain.imu.robotYArray;
+//        arrayRobotDist = robotUG.driveTrain.imu.robotDistArray;
+//        arrayRobotAngle = robotUG.driveTrain.imu.robotAngleArray;
+//        IMUCounter = robotUG.driveTrain.imu.counter;
+//
+//        arrayFLBR = robotUG.driveTrain.imu.FLBRArray;
+//        arrayFRBL = robotUG.driveTrain.imu.FRBLArray;
 
-        timeArray = robotUG.driveTrain.imu.timeArray;
+//
+//        Arrays.fill(arrayRobotDist,IMUCounter,(size),arrayRobotDist[IMUCounter-1]);
+//        Arrays.fill(arrayRobotAngle,IMUCounter,(size),arrayRobotAngle[IMUCounter-1]);
 
-        arrayRobotX = robotUG.driveTrain.imu.robotXArray;
-        arrayRobotY = robotUG.driveTrain.imu.robotYArray;
-        arrayRobotDist = robotUG.driveTrain.imu.robotDistArray;
-        arrayRobotAngle = robotUG.driveTrain.imu.robotAngleArray;
-        IMUCounter = robotUG.driveTrain.imu.counter;
-
-        arrayFLBR = robotUG.driveTrain.imu.FLBRArray;
-        arrayFRBL = robotUG.driveTrain.imu.FRBLArray;
-
-
-        Arrays.fill(arrayRobotDist,IMUCounter,(size),arrayRobotDist[IMUCounter-1]);
-        Arrays.fill(arrayRobotAngle,IMUCounter,(size),arrayRobotAngle[IMUCounter-1]);
-
-        Arrays.fill(arrayFieldDist,IMUCounter,(size),arrayFieldDist[IMUCounter-1]);
+//        Arrays.fill(arrayFieldDist,IMUCounter,(size),arrayFieldDist[IMUCounter-1]);
         Arrays.fill(collectorArray,IMUCounter,(size), collectorArray[IMUCounter-1]);
         Arrays.fill(conveyorArray,IMUCounter,(size), conveyorArray[IMUCounter-1]);
         Arrays.fill(shooterArray,IMUCounter,(size), shooterArray[IMUCounter-1]);
         Arrays.fill(wgaAngleArray,IMUCounter,(size), wgaAngleArray[IMUCounter-1]);
 
-        double deltaTime = (timeArray[1] - timeArray[0]);
+//        double deltaTime = (timeArray[1] - timeArray[0]);
         for(int k = IMUCounter-1; k < size;k++){
-            timeArray[k] = timeArray[k-1] + deltaTime;
+//            timeArray[k] = timeArray[k-1] + deltaTime;
             robotUG.driveTrain.imu.RobotPoints.add(robotUG.driveTrain.imu.RobotPoints.get(k-1));
 
             fc.BlueRingPoints.add(fc.BlueRingPoints.get(k-1));
