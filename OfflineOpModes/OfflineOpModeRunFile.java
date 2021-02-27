@@ -45,22 +45,22 @@ import UltimateGoal_RobotTeam.HarwareConfig.HardwareRobotMulti;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.BasicAuto;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.BlueExPowerShotAuto;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.BlueInPowerShotAuto;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueInt;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedExt;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedInt;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueInt;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedExt;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedInt;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.MainBlueExAuto;
 import UltimateGoal_RobotTeam.OpModes.Autonomous.MainBlueInAuto;
 
-import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueExterior;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueInterior;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueExterior;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.CompleteAutonomousBlueInterior;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueExt;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingBlueInt;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedExt;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.DoNothingRedInt;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.RedExteriorWobbleHighGoal;
 //import UltimateGoal_RobotTeam.OpModes.Autonomous.RedInteriorWobbleHighGoal;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.RedExteriorWobbleHighGoal;
-import UltimateGoal_RobotTeam.OpModes.Autonomous.RedInteriorWobbleHighGoal;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.RedExteriorWobbleHighGoal;
+//import UltimateGoal_RobotTeam.OpModes.Autonomous.RedInteriorWobbleHighGoal;
 import UltimateGoal_RobotTeam.Utilities.PursuitLines;
 
 //import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -328,10 +328,10 @@ public class OfflineOpModeRunFile extends BasicAuto {
         //Instantiate a static class to run the code with
         OfflineOpModeRunFile OffRunFiles = new OfflineOpModeRunFile();
 
-        OffRunFiles.location = computer.KARL;//For Karl on HP
+//        OffRunFiles.location = computer.KARL;//For Karl on HP
 //  UPDATE SELECTION and PATH for your machine
 //        OffRunFiles.location = computer.MAC;//For Caleb
-//        OffRunFiles.location = computer.WILL;//For William
+        OffRunFiles.location = computer.WILL;//For William
 
 
 
@@ -356,8 +356,8 @@ public class OfflineOpModeRunFile extends BasicAuto {
             }
             else if (h == 2){// Define robot #2
 //                CompleteAutonomousBlueInterior inputOpMode = new CompleteAutonomousBlueInterior();
-//                BlueInPowerShotAuto inputOpMode = new BlueInPowerShotAuto();
-                DoNothingBlueInt inputOpMode = new DoNothingBlueInt();
+                MainBlueInAuto inputOpMode = new MainBlueInAuto();
+//                DoNothingBlueInt inputOpMode = new DoNothingBlueInt();
 
                 OffRunFiles = new OfflineOpModeRunFile(inputOpMode);
 
